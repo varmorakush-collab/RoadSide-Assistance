@@ -28,4 +28,16 @@
     <string name="error_password_mismatch">Passwords do not match</string>
 
     <string name="msg_signup_success">Account created successfully!</string>
+
+    <!-- Login Screen Strings -->
+    <string name="title_login">Welcome Back</string>
+    <string name="subtitle_login">Log in to access 24/7 roadside assistance services</string>
+    <string name="btn_login">Log In</string>
+    <string name="text_forgot_password">Forgot Password?</string>
+    <string name="text_dont_have_account">Don\'t have an account? </string>
+
+    <string name="msg_login_success">Logged in successfully!</string>
+    <string name="msg_verification_sent">Verification email sent! Please check your inbox.</string>
+    <string name="error_email_not_verified">Please verify your email address before logging in.</string>
+    <string name="msg_reset_email_sent">Password reset email sent to your email address.</string>
 </resources>

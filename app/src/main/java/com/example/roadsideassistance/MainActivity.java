@@ -3,6 +3,7 @@ package com.example.roadsideassistance;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         TextView tvUserInfo = findViewById(R.id.tvUserInfo);
-        MaterialButton btnOpenSignup = findViewById(R.id.btnOpenSignup);
+        MaterialButton btnLogout = findViewById(R.id.btnLogout);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null && user.getEmail() != null) {
@@ -38,9 +39,13 @@ public class MainActivity extends AppCompatActivity {
             tvUserInfo.setText("Welcome to Roadside Assistance!");
         }
 
-        btnOpenSignup.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, SignupActivity.class);
+        btnLogout.setOnClickListener(v -> {
+            FirebaseAuth.getInstance().signOut();
+            Toast.makeText(MainActivity.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+            finish();
         });
     }
 }

@@ -68,7 +68,11 @@ public class SignupActivity extends AppCompatActivity {
         setupTextWatchers();
 
         btnSignup.setOnClickListener(v -> handleSignup());
-        tvLogin.setOnClickListener(v -> finish());
+        tvLogin.setOnClickListener(v -> {
+            Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        });
     }
 
     private void initViews() {
@@ -205,6 +209,8 @@ public class SignupActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         FirebaseUser firebaseUser = mAuth.getCurrentUser();
                         if (firebaseUser != null) {
+                            // Send verification email
+                            firebaseUser.sendEmailVerification();
                             String userId = firebaseUser.getUid();
                             saveUserToDatabase(userId, fullName, email, phone);
                         } else {
@@ -229,12 +235,27 @@ public class SignupActivity extends AppCompatActivity {
         userMap.put("phone", phone);
         userMap.put("createdAt", System.currentTimeMillis());
 
-        mDatabase.child("users").child(userId).setValue(userMap)
-                .addOnCompleteListener(task -> {
-                    showLoading(false);
-                    Toast.makeText(SignupActivity.this, R.string.msg_signup_success, Toast.LENGTH_SHORT).show();
-                    navigateToMain();
-                });
+        final boolean[] isNavigated = {false};
+
+        Runnable navigateAction = () -> {
+            if (!isNavigated[0]) {
+                isNavigated[0] = true;
+                showLoading(false);
+                Toast.makeText(SignupActivity.this, R.string.msg_signup_success, Toast.LENGTH_SHORT).show();
+                navigateToMain();
+            }
+        };
+
+        // Safety timeout handler (3.5s) to prevent infinite loading if Realtime DB is offline or lacks URL
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(navigateAction, 3500);
+
+        try {
+            mDatabase.child("users").child(userId).setValue(userMap)
+                    .addOnCompleteListener(task -> navigateAction.run())
+                    .addOnFailureListener(e -> navigateAction.run());
+        } catch (Exception e) {
+            navigateAction.run();
+        }
     }
 
     private void navigateToMain() {

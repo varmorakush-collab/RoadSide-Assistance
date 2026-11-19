@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">RoadSideAssistance</string>
+    <string name="app_name">Roadside Assistance</string>
+    <string name="app_tagline">24/7 Emergency Roadside Support</string>
+    <string name="loading">Loading&#8230;</string>
 </resources>

@@ -1,0 +1,27 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Shield Background -->
+    <path
+        android:fillColor="#FF6B00"
+        android:pathData="M12,1L3,5v6c0,5.55 3.84,10.74 9,12 5.16,-1.26 9,-6.45 9,-12V5L12,1z" />
+
+    <!-- Inner Shield Accent -->
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M12,2.5L4.5,5.8v5.2c0,4.8 3.3,9.3 7.5,10.4 4.2,-1.1 7.5,-5.6 7.5,-10.4V5.8L12,2.5z" />
+
+    <!-- Car / Wrench Symbol inside Shield -->
+    <!-- Car body -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M18.92,11.01C18.72,10.42 18.16,10 17.5,10h-11c-0.66,0 -1.22,0.42 -1.42,1.01L3,16v8h2v-2h14v2h2v-8l-2.08-4.99zM6.5,15.5c-0.83,0 -1.5,-0.67 -1.5,-1.5s0.67,-1.5 1.5,-1.5 1.5,0.67 1.5,1.5 -0.67,1.5 -1.5,1.5zM17.5,15.5c-0.83,0 -1.5,-0.67 -1.5,-1.5s0.67,-1.5 1.5,-1.5 1.5,0.67 1.5,1.5 -0.67,1.5 -1.5,1.5zM5,12l1.5,-4.5h11L19,12H5z" />
+
+    <!-- Wrench/Cross Wrench Accent overlay on car top right -->
+    <path
+        android:fillColor="#FF6B00"
+        android:pathData="M15,7.5l2,-2 1.5,1.5 -2,2z" />
+</vector>

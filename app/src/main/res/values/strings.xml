@@ -2,4 +2,30 @@
     <string name="app_name">Roadside Assistance</string>
     <string name="app_tagline">24/7 Emergency Roadside Support</string>
     <string name="loading">Loading&#8230;</string>
+
+    <!-- Signup Screen Strings -->
+    <string name="title_signup">Create Account</string>
+    <string name="subtitle_signup">Sign up to get 24/7 emergency roadside assistance</string>
+    <string name="hint_full_name">Full Name</string>
+    <string name="hint_email">Email Address</string>
+    <string name="hint_phone">Phone Number</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_confirm_password">Confirm Password</string>
+    <string name="btn_signup">Sign Up</string>
+    <string name="text_already_have_account">Already have an account? </string>
+    <string name="text_login">Login</string>
+
+    <!-- Validation Error Messages -->
+    <string name="error_empty_name">Please enter your full name</string>
+    <string name="error_short_name">Name must be at least 2 characters long</string>
+    <string name="error_empty_email">Please enter your email address</string>
+    <string name="error_invalid_email">Please enter a valid email address</string>
+    <string name="error_empty_phone">Please enter your phone number</string>
+    <string name="error_invalid_phone">Please enter a valid 10-digit mobile number</string>
+    <string name="error_empty_password">Please enter a password</string>
+    <string name="error_short_password">Password must be at least 6 characters long</string>
+    <string name="error_empty_confirm_password">Please confirm your password</string>
+    <string name="error_password_mismatch">Passwords do not match</string>
+
+    <string name="msg_signup_success">Account created successfully!</string>
 </resources>

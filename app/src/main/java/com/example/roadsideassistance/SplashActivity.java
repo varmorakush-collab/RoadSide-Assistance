@@ -38,9 +38,14 @@ public class SplashActivity extends AppCompatActivity {
         tvTagline.startAnimation(bottomUp);
         progressBar.startAnimation(bottomUp);
 
-        // Delay for splash screen then navigate to MainActivity
+        // Delay for splash screen then navigate based on user login state
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+            Intent intent;
+            if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null) {
+                intent = new Intent(SplashActivity.this, MainActivity.class);
+            } else {
+                intent = new Intent(SplashActivity.this, SignupActivity.class);
+            }
             startActivity(intent);
             finish();
         }, SPLASH_DELAY_MS);

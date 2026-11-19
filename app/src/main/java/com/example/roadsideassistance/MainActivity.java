@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         TextView tvUserInfo = findViewById(R.id.tvUserInfo);
+        MaterialButton btnChangePassword = findViewById(R.id.btnChangePassword);
         MaterialButton btnLogout = findViewById(R.id.btnLogout);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -38,6 +39,11 @@ public class MainActivity extends AppCompatActivity {
         } else {
             tvUserInfo.setText("Welcome to Roadside Assistance!");
         }
+
+        btnChangePassword.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ChangePasswordActivity.class);
+            startActivity(intent);
+        });
 
         btnLogout.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();

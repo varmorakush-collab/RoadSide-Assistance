@@ -162,7 +162,6 @@ public class SignupActivity extends AppCompatActivity {
         boolean isValid = true;
         View focusView = null;
 
-        // Condition 1: Full Name Validation
         if (TextUtils.isEmpty(fullName)) {
             tilFullName.setError(getString(R.string.error_empty_name));
             focusView = etFullName;
@@ -173,7 +172,6 @@ public class SignupActivity extends AppCompatActivity {
             isValid = false;
         }
 
-        // Condition 2: Email Validation
         if (TextUtils.isEmpty(email)) {
             tilEmail.setError(getString(R.string.error_empty_email));
             if (focusView == null) focusView = etEmail;
@@ -184,7 +182,6 @@ public class SignupActivity extends AppCompatActivity {
             isValid = false;
         }
 
-        // Condition 3: Phone Validation
         if (TextUtils.isEmpty(phone)) {
             tilPhone.setError(getString(R.string.error_empty_phone));
             if (focusView == null) focusView = etPhone;
@@ -195,7 +192,6 @@ public class SignupActivity extends AppCompatActivity {
             isValid = false;
         }
 
-        // Condition 4: Security Question & Answer Validation
         if (TextUtils.isEmpty(securityQuestion)) {
             tilSecurityQuestion.setError(getString(R.string.error_empty_question));
             if (focusView == null) focusView = actvSecurityQuestion;
@@ -208,7 +204,6 @@ public class SignupActivity extends AppCompatActivity {
             isValid = false;
         }
 
-        // Condition 5: Password Validation
         if (TextUtils.isEmpty(password)) {
             tilPassword.setError(getString(R.string.error_empty_password));
             if (focusView == null) focusView = etPassword;
@@ -219,7 +214,6 @@ public class SignupActivity extends AppCompatActivity {
             isValid = false;
         }
 
-        // Condition 6: Confirm Password Validation
         if (TextUtils.isEmpty(confirmPassword)) {
             tilConfirmPassword.setError(getString(R.string.error_empty_confirm_password));
             if (focusView == null) focusView = etConfirmPassword;
@@ -271,8 +265,6 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     private void saveUserToDatabase(String userId, String fullName, String email, String phone, String securityQuestion, String securityAnswer, String password) {
-        UserManager.saveUser(this, email, password, securityQuestion, securityAnswer);
-
         Map<String, Object> userMap = new HashMap<>();
         userMap.put("userId", userId);
         userMap.put("fullName", fullName);
@@ -293,7 +285,7 @@ public class SignupActivity extends AppCompatActivity {
             }
         };
 
-        new Handler(Looper.getMainLooper()).postDelayed(navigateAction, 3500);
+        new Handler(Looper.getMainLooper()).postDelayed(navigateAction, 3000);
 
         try {
             mDatabase.child("users").child(userId).setValue(userMap)

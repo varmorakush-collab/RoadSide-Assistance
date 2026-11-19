@@ -81,10 +81,22 @@
                     android:textStyle="bold" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnLogout"
+                    android:id="@+id/btnChangePassword"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginTop="20dp"
+                    android:backgroundTint="@color/primary_orange"
+                    android:text="Change Password"
+                    android:textColor="@color/text_white"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="10dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnLogout"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="12dp"
                     android:backgroundTint="@color/error_red"
                     android:text="Log Out"
                     android:textColor="@color/text_white"

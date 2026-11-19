@@ -25,7 +25,6 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -113,7 +112,6 @@ public class LoginActivity extends AppCompatActivity {
         boolean isValid = true;
         View focusView = null;
 
-        // Condition 1: Email Validation
         if (TextUtils.isEmpty(email)) {
             tilEmail.setError(getString(R.string.error_empty_email));
             focusView = etEmail;
@@ -124,7 +122,6 @@ public class LoginActivity extends AppCompatActivity {
             isValid = false;
         }
 
-        // Condition 2: Password Validation
         if (TextUtils.isEmpty(password)) {
             tilPassword.setError(getString(R.string.error_empty_password));
             if (focusView == null) focusView = etPassword;
@@ -148,16 +145,6 @@ public class LoginActivity extends AppCompatActivity {
     private void loginUserWithFirebase(String email, String password) {
         showLoading(true);
 
-        // 1. Check local user manager first for zero-latency login
-        String storedPassword = UserManager.getPassword(this, email);
-        if (storedPassword != null && storedPassword.equals(password)) {
-            showLoading(false);
-            Toast.makeText(LoginActivity.this, R.string.msg_login_success, Toast.LENGTH_SHORT).show();
-            navigateToMain();
-            return;
-        }
-
-        // 2. Perform Firebase Auth Login
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
@@ -165,18 +152,12 @@ public class LoginActivity extends AppCompatActivity {
                         FirebaseUser firebaseUser = mAuth.getCurrentUser();
                         checkEmailVerificationAndNavigate(firebaseUser);
                     } else {
-                        Exception e = task.getException();
-                        if (e instanceof FirebaseAuthInvalidUserException) {
-                            showLoading(false);
-                            showErrorPopup("Email Not Registered", "No registered account found with email address: " + email + ". Please sign up first.");
-                        } else {
-                            checkDatabasePasswordAndLogin(email, password);
-                        }
+                        checkDatabasePasswordAndLogin(email, password, task.getException());
                     }
                 });
     }
 
-    private void checkDatabasePasswordAndLogin(String email, String password) {
+    private void checkDatabasePasswordAndLogin(String email, String password, Exception authException) {
         final boolean[] isHandled = {false};
         Handler handler = new Handler(Looper.getMainLooper());
 
@@ -184,16 +165,10 @@ public class LoginActivity extends AppCompatActivity {
             if (!isHandled[0]) {
                 isHandled[0] = true;
                 showLoading(false);
-                String storedPass = UserManager.getPassword(LoginActivity.this, email);
-                if (storedPass != null) {
-                    if (storedPass.equals(password)) {
-                        Toast.makeText(LoginActivity.this, R.string.msg_login_success, Toast.LENGTH_SHORT).show();
-                        navigateToMain();
-                    } else {
-                        showErrorPopup("Login Failed", "Email or password is incorrect. Please check your credentials.");
-                    }
-                } else {
+                if (authException instanceof FirebaseAuthInvalidUserException) {
                     showErrorPopup("Email Not Registered", "No account registered with email address: " + email + ". Please sign up first.");
+                } else {
+                    showErrorPopup("Login Failed", "Email or password is incorrect. Please check your credentials.");
                 }
             }
         };
@@ -227,23 +202,12 @@ public class LoginActivity extends AppCompatActivity {
                             }
 
                             if (passwordMatched) {
-                                UserManager.updatePassword(LoginActivity.this, email, password);
                                 Toast.makeText(LoginActivity.this, R.string.msg_login_success, Toast.LENGTH_SHORT).show();
                                 navigateToMain();
                             } else if (userFound) {
                                 showErrorPopup("Login Failed", "Email or password is incorrect. Please check your credentials.");
                             } else {
-                                String storedPass = UserManager.getPassword(LoginActivity.this, email);
-                                if (storedPass != null) {
-                                    if (storedPass.equals(password)) {
-                                        Toast.makeText(LoginActivity.this, R.string.msg_login_success, Toast.LENGTH_SHORT).show();
-                                        navigateToMain();
-                                    } else {
-                                        showErrorPopup("Login Failed", "Email or password is incorrect. Please check your credentials.");
-                                    }
-                                } else {
-                                    showErrorPopup("Email Not Registered", "No account registered with email address: " + email + ". Please sign up first.");
-                                }
+                                showErrorPopup("Email Not Registered", "No account registered with email address: " + email + ". Please sign up first.");
                             }
                         }
 

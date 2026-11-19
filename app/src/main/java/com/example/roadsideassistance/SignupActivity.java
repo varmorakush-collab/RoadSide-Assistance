@@ -265,6 +265,8 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     private void saveUserToDatabase(String userId, String fullName, String email, String phone, String securityQuestion, String securityAnswer, String password) {
+        UserManager.saveUser(this, fullName, email, phone, password, securityQuestion, securityAnswer);
+
         Map<String, Object> userMap = new HashMap<>();
         userMap.put("userId", userId);
         userMap.put("fullName", fullName);

@@ -2,6 +2,8 @@ package com.example.roadsideassistance;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -12,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -22,7 +25,13 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -133,25 +142,128 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // Perform Login with Firebase
         loginUserWithFirebase(email, password);
     }
 
     private void loginUserWithFirebase(String email, String password) {
         showLoading(true);
 
+        // 1. Check local user manager first for zero-latency login
+        String storedPassword = UserManager.getPassword(this, email);
+        if (storedPassword != null && storedPassword.equals(password)) {
+            showLoading(false);
+            Toast.makeText(LoginActivity.this, R.string.msg_login_success, Toast.LENGTH_SHORT).show();
+            navigateToMain();
+            return;
+        }
+
+        // 2. Perform Firebase Auth Login
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
-                    showLoading(false);
                     if (task.isSuccessful()) {
+                        showLoading(false);
                         FirebaseUser firebaseUser = mAuth.getCurrentUser();
                         checkEmailVerificationAndNavigate(firebaseUser);
                     } else {
                         Exception e = task.getException();
-                        String errorMsg = e != null ? e.getMessage() : "Authentication failed. Please check credentials.";
-                        Toast.makeText(LoginActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                        if (e instanceof FirebaseAuthInvalidUserException) {
+                            showLoading(false);
+                            showErrorPopup("Email Not Registered", "No registered account found with email address: " + email + ". Please sign up first.");
+                        } else {
+                            checkDatabasePasswordAndLogin(email, password);
+                        }
                     }
                 });
+    }
+
+    private void checkDatabasePasswordAndLogin(String email, String password) {
+        final boolean[] isHandled = {false};
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        Runnable timeoutRunnable = () -> {
+            if (!isHandled[0]) {
+                isHandled[0] = true;
+                showLoading(false);
+                String storedPass = UserManager.getPassword(LoginActivity.this, email);
+                if (storedPass != null) {
+                    if (storedPass.equals(password)) {
+                        Toast.makeText(LoginActivity.this, R.string.msg_login_success, Toast.LENGTH_SHORT).show();
+                        navigateToMain();
+                    } else {
+                        showErrorPopup("Login Failed", "Email or password is incorrect. Please check your credentials.");
+                    }
+                } else {
+                    showErrorPopup("Email Not Registered", "No account registered with email address: " + email + ". Please sign up first.");
+                }
+            }
+        };
+        handler.postDelayed(timeoutRunnable, 2500);
+
+        try {
+            FirebaseDatabase.getInstance().getReference().child("users")
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (isHandled[0]) return;
+                            isHandled[0] = true;
+                            handler.removeCallbacks(timeoutRunnable);
+                            showLoading(false);
+
+                            boolean userFound = false;
+                            boolean passwordMatched = false;
+
+                            if (snapshot.exists()) {
+                                for (DataSnapshot userSnap : snapshot.getChildren()) {
+                                    String dbEmail = userSnap.child("email").getValue(String.class);
+                                    if (dbEmail != null && dbEmail.trim().equalsIgnoreCase(email.trim())) {
+                                        userFound = true;
+                                        String dbPassword = userSnap.child("password").getValue(String.class);
+                                        if (dbPassword != null && dbPassword.equals(password)) {
+                                            passwordMatched = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (passwordMatched) {
+                                UserManager.updatePassword(LoginActivity.this, email, password);
+                                Toast.makeText(LoginActivity.this, R.string.msg_login_success, Toast.LENGTH_SHORT).show();
+                                navigateToMain();
+                            } else if (userFound) {
+                                showErrorPopup("Login Failed", "Email or password is incorrect. Please check your credentials.");
+                            } else {
+                                String storedPass = UserManager.getPassword(LoginActivity.this, email);
+                                if (storedPass != null) {
+                                    if (storedPass.equals(password)) {
+                                        Toast.makeText(LoginActivity.this, R.string.msg_login_success, Toast.LENGTH_SHORT).show();
+                                        navigateToMain();
+                                    } else {
+                                        showErrorPopup("Login Failed", "Email or password is incorrect. Please check your credentials.");
+                                    }
+                                } else {
+                                    showErrorPopup("Email Not Registered", "No account registered with email address: " + email + ". Please sign up first.");
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            if (isHandled[0]) return;
+                            isHandled[0] = true;
+                            handler.removeCallbacks(timeoutRunnable);
+                            showLoading(false);
+                            showErrorPopup("Login Failed", "Email or password is incorrect.");
+                        }
+                    });
+        } catch (Exception e) {
+            if (!isHandled[0]) {
+                isHandled[0] = true;
+                handler.removeCallbacks(timeoutRunnable);
+                showLoading(false);
+                showErrorPopup("Login Failed", "Email or password is incorrect.");
+            }
+        }
     }
 
     private void checkEmailVerificationAndNavigate(FirebaseUser user) {
@@ -164,7 +276,6 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(LoginActivity.this, R.string.msg_login_success, Toast.LENGTH_SHORT).show();
             navigateToMain();
         } else {
-            // Email is not verified yet -> Prompt user with Verification Dialog
             new AlertDialog.Builder(this)
                     .setTitle("Email Verification Required")
                     .setMessage(R.string.error_email_not_verified)
@@ -188,27 +299,20 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void handleForgotPassword() {
+        Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
         String email = etEmail.getText() != null ? etEmail.getText().toString().trim() : "";
-
-        if (TextUtils.isEmpty(email) || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            tilEmail.setError("Please enter a valid email address to reset password");
-            etEmail.requestFocus();
-            return;
+        if (!TextUtils.isEmpty(email)) {
+            intent.putExtra("email", email);
         }
+        startActivity(intent);
+    }
 
-        showLoading(true);
-
-        mAuth.sendPasswordResetEmail(email)
-                .addOnCompleteListener(task -> {
-                    showLoading(false);
-                    if (task.isSuccessful()) {
-                        Toast.makeText(LoginActivity.this, R.string.msg_reset_email_sent, Toast.LENGTH_LONG).show();
-                    } else {
-                        Exception e = task.getException();
-                        String errorMsg = e != null ? e.getMessage() : "Failed to send reset email.";
-                        Toast.makeText(LoginActivity.this, errorMsg, Toast.LENGTH_LONG).show();
-                    }
-                });
+    private void showErrorPopup(String title, String message) {
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 
     private void navigateToMain() {

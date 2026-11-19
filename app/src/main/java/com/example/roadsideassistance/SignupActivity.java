@@ -2,16 +2,20 @@ package com.example.roadsideassistance;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Patterns;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -21,6 +25,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -33,12 +38,16 @@ public class SignupActivity extends AppCompatActivity {
     private TextInputLayout tilFullName;
     private TextInputLayout tilEmail;
     private TextInputLayout tilPhone;
+    private TextInputLayout tilSecurityQuestion;
+    private TextInputLayout tilSecurityAnswer;
     private TextInputLayout tilPassword;
     private TextInputLayout tilConfirmPassword;
 
     private TextInputEditText etFullName;
     private TextInputEditText etEmail;
     private TextInputEditText etPhone;
+    private AutoCompleteTextView actvSecurityQuestion;
+    private TextInputEditText etSecurityAnswer;
     private TextInputEditText etPassword;
     private TextInputEditText etConfirmPassword;
 
@@ -65,6 +74,7 @@ public class SignupActivity extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         initViews();
+        setupSecurityQuestionsDropdown();
         setupTextWatchers();
 
         btnSignup.setOnClickListener(v -> handleSignup());
@@ -79,18 +89,28 @@ public class SignupActivity extends AppCompatActivity {
         tilFullName = findViewById(R.id.tilFullName);
         tilEmail = findViewById(R.id.tilEmail);
         tilPhone = findViewById(R.id.tilPhone);
+        tilSecurityQuestion = findViewById(R.id.tilSecurityQuestion);
+        tilSecurityAnswer = findViewById(R.id.tilSecurityAnswer);
         tilPassword = findViewById(R.id.tilPassword);
         tilConfirmPassword = findViewById(R.id.tilConfirmPassword);
 
         etFullName = findViewById(R.id.etFullName);
         etEmail = findViewById(R.id.etEmail);
         etPhone = findViewById(R.id.etPhone);
+        actvSecurityQuestion = findViewById(R.id.actvSecurityQuestion);
+        etSecurityAnswer = findViewById(R.id.etSecurityAnswer);
         etPassword = findViewById(R.id.etPassword);
         etConfirmPassword = findViewById(R.id.etConfirmPassword);
 
         btnSignup = findViewById(R.id.btnSignup);
         progressBar = findViewById(R.id.progressBar);
         tvLogin = findViewById(R.id.tvLogin);
+    }
+
+    private void setupSecurityQuestionsDropdown() {
+        String[] questions = getResources().getStringArray(R.array.security_questions);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, questions);
+        actvSecurityQuestion.setAdapter(adapter);
     }
 
     private void setupTextWatchers() {
@@ -103,6 +123,8 @@ public class SignupActivity extends AppCompatActivity {
                 tilFullName.setError(null);
                 tilEmail.setError(null);
                 tilPhone.setError(null);
+                tilSecurityQuestion.setError(null);
+                tilSecurityAnswer.setError(null);
                 tilPassword.setError(null);
                 tilConfirmPassword.setError(null);
             }
@@ -114,6 +136,8 @@ public class SignupActivity extends AppCompatActivity {
         etFullName.addTextChangedListener(clearErrorWatcher);
         etEmail.addTextChangedListener(clearErrorWatcher);
         etPhone.addTextChangedListener(clearErrorWatcher);
+        actvSecurityQuestion.addTextChangedListener(clearErrorWatcher);
+        etSecurityAnswer.addTextChangedListener(clearErrorWatcher);
         etPassword.addTextChangedListener(clearErrorWatcher);
         etConfirmPassword.addTextChangedListener(clearErrorWatcher);
     }
@@ -122,13 +146,16 @@ public class SignupActivity extends AppCompatActivity {
         String fullName = etFullName.getText() != null ? etFullName.getText().toString().trim() : "";
         String email = etEmail.getText() != null ? etEmail.getText().toString().trim() : "";
         String phone = etPhone.getText() != null ? etPhone.getText().toString().trim() : "";
+        String securityQuestion = actvSecurityQuestion.getText() != null ? actvSecurityQuestion.getText().toString().trim() : "";
+        String securityAnswer = etSecurityAnswer.getText() != null ? etSecurityAnswer.getText().toString().trim() : "";
         String password = etPassword.getText() != null ? etPassword.getText().toString().trim() : "";
         String confirmPassword = etConfirmPassword.getText() != null ? etConfirmPassword.getText().toString().trim() : "";
 
-        // Clear existing errors
         tilFullName.setError(null);
         tilEmail.setError(null);
         tilPhone.setError(null);
+        tilSecurityQuestion.setError(null);
+        tilSecurityAnswer.setError(null);
         tilPassword.setError(null);
         tilConfirmPassword.setError(null);
 
@@ -157,7 +184,7 @@ public class SignupActivity extends AppCompatActivity {
             isValid = false;
         }
 
-        // Condition 3: Phone Number Validation (10 digits)
+        // Condition 3: Phone Validation
         if (TextUtils.isEmpty(phone)) {
             tilPhone.setError(getString(R.string.error_empty_phone));
             if (focusView == null) focusView = etPhone;
@@ -168,7 +195,20 @@ public class SignupActivity extends AppCompatActivity {
             isValid = false;
         }
 
-        // Condition 4: Password Validation (at least 6 characters)
+        // Condition 4: Security Question & Answer Validation
+        if (TextUtils.isEmpty(securityQuestion)) {
+            tilSecurityQuestion.setError(getString(R.string.error_empty_question));
+            if (focusView == null) focusView = actvSecurityQuestion;
+            isValid = false;
+        }
+
+        if (TextUtils.isEmpty(securityAnswer)) {
+            tilSecurityAnswer.setError(getString(R.string.error_empty_answer));
+            if (focusView == null) focusView = etSecurityAnswer;
+            isValid = false;
+        }
+
+        // Condition 5: Password Validation
         if (TextUtils.isEmpty(password)) {
             tilPassword.setError(getString(R.string.error_empty_password));
             if (focusView == null) focusView = etPassword;
@@ -179,7 +219,7 @@ public class SignupActivity extends AppCompatActivity {
             isValid = false;
         }
 
-        // Condition 5: Confirm Password Validation (Must match Password)
+        // Condition 6: Confirm Password Validation
         if (TextUtils.isEmpty(confirmPassword)) {
             tilConfirmPassword.setError(getString(R.string.error_empty_confirm_password));
             if (focusView == null) focusView = etConfirmPassword;
@@ -197,11 +237,10 @@ public class SignupActivity extends AppCompatActivity {
             return;
         }
 
-        // All validations passed -> Register user with Firebase Auth
-        registerUserWithFirebase(fullName, email, phone, password);
+        registerUserWithFirebase(fullName, email, phone, securityQuestion, securityAnswer, password);
     }
 
-    private void registerUserWithFirebase(String fullName, String email, String phone, String password) {
+    private void registerUserWithFirebase(String fullName, String email, String phone, String securityQuestion, String securityAnswer, String password) {
         showLoading(true);
 
         mAuth.createUserWithEmailAndPassword(email, password)
@@ -209,30 +248,39 @@ public class SignupActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         FirebaseUser firebaseUser = mAuth.getCurrentUser();
                         if (firebaseUser != null) {
-                            // Send verification email
-                            firebaseUser.sendEmailVerification();
+                            try {
+                                firebaseUser.sendEmailVerification();
+                            } catch (Exception ignored) {}
                             String userId = firebaseUser.getUid();
-                            saveUserToDatabase(userId, fullName, email, phone);
+                            saveUserToDatabase(userId, fullName, email, phone, securityQuestion, securityAnswer, password);
                         } else {
                             showLoading(false);
-                            Toast.makeText(SignupActivity.this, R.string.msg_signup_success, Toast.LENGTH_SHORT).show();
-                            navigateToMain();
+                            showSignupSuccessPopup();
                         }
                     } else {
                         showLoading(false);
                         Exception e = task.getException();
-                        String errorMsg = e != null ? e.getMessage() : "Signup failed. Please try again.";
-                        Toast.makeText(SignupActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                        if (e instanceof FirebaseAuthUserCollisionException) {
+                            showErrorPopup("Email Already Registered", "An account with email address (" + email + ") is already registered. Please log in or reset your password.");
+                        } else {
+                            String errorMsg = e != null ? e.getMessage() : "Signup failed. Please try again.";
+                            showErrorPopup("Signup Failed", errorMsg);
+                        }
                     }
                 });
     }
 
-    private void saveUserToDatabase(String userId, String fullName, String email, String phone) {
+    private void saveUserToDatabase(String userId, String fullName, String email, String phone, String securityQuestion, String securityAnswer, String password) {
+        UserManager.saveUser(this, email, password, securityQuestion, securityAnswer);
+
         Map<String, Object> userMap = new HashMap<>();
         userMap.put("userId", userId);
         userMap.put("fullName", fullName);
         userMap.put("email", email);
         userMap.put("phone", phone);
+        userMap.put("securityQuestion", securityQuestion);
+        userMap.put("securityAnswer", securityAnswer.toLowerCase());
+        userMap.put("password", password);
         userMap.put("createdAt", System.currentTimeMillis());
 
         final boolean[] isNavigated = {false};
@@ -241,13 +289,11 @@ public class SignupActivity extends AppCompatActivity {
             if (!isNavigated[0]) {
                 isNavigated[0] = true;
                 showLoading(false);
-                Toast.makeText(SignupActivity.this, R.string.msg_signup_success, Toast.LENGTH_SHORT).show();
-                navigateToMain();
+                showSignupSuccessPopup();
             }
         };
 
-        // Safety timeout handler (3.5s) to prevent infinite loading if Realtime DB is offline or lacks URL
-        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(navigateAction, 3500);
+        new Handler(Looper.getMainLooper()).postDelayed(navigateAction, 3500);
 
         try {
             mDatabase.child("users").child(userId).setValue(userMap)
@@ -256,6 +302,24 @@ public class SignupActivity extends AppCompatActivity {
         } catch (Exception e) {
             navigateAction.run();
         }
+    }
+
+    private void showSignupSuccessPopup() {
+        new AlertDialog.Builder(this)
+                .setTitle("Account Created Successfully")
+                .setMessage("Your account has been created! Welcome to Roadside Assistance.")
+                .setIcon(R.drawable.ic_check_circle)
+                .setCancelable(false)
+                .setPositiveButton("OK", (dialog, which) -> navigateToMain())
+                .show();
+    }
+
+    private void showErrorPopup(String title, String message) {
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 
     private void navigateToMain() {

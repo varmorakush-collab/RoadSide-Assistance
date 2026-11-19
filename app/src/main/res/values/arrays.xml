@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="security_questions">
+        <item>What is your pet\'s name?</item>
+        <item>What is your birth city?</item>
+        <item>What was your first school name?</item>
+        <item>What is your favorite food?</item>
+    </string-array>
+</resources>

@@ -142,6 +142,47 @@
 
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <!-- Security Question Dropdown -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilSecurityQuestion"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:hint="@string/hint_security_question"
+                        app:startIconDrawable="@drawable/ic_help_question"
+                        app:startIconTint="@color/primary_orange">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/actvSecurityQuestion"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:textSize="15sp" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Security Answer Field -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilSecurityAnswer"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:hint="@string/hint_security_answer"
+                        app:startIconDrawable="@drawable/ic_help_question"
+                        app:startIconTint="@color/primary_orange">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etSecurityAnswer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"
+                            android:maxLines="1"
+                            android:textSize="15sp" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
                     <!-- Password Field -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilPassword"

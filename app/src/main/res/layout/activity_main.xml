@@ -81,10 +81,22 @@
                     android:textStyle="bold" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnViewProfile"
+                    android:id="@+id/btnRequestBattery"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginTop="20dp"
+                    android:backgroundTint="@color/primary_orange"
+                    android:text="Request Battery Help"
+                    android:textColor="@color/text_white"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="10dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnViewProfile"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="12dp"
                     android:backgroundTint="@color/primary_orange"
                     android:text="View &amp; Edit Profile"
                     android:textColor="@color/text_white"

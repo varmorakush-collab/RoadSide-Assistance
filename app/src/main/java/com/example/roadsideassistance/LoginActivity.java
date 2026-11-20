@@ -29,8 +29,12 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -150,11 +154,40 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         showLoading(false);
                         FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                        if (firebaseUser != null) {
+                            ensureUserInDatabase(firebaseUser.getUid(), email, password);
+                        }
                         checkEmailVerificationAndNavigate(firebaseUser);
                     } else {
                         checkDatabasePasswordAndLogin(email, password, task.getException());
                     }
                 });
+    }
+
+    private void ensureUserInDatabase(String userId, String email, String password) {
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(userId);
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    Map<String, Object> userMap = new HashMap<>();
+                    userMap.put("userId", userId);
+                    userMap.put("fullName", email.split("@")[0]);
+                    userMap.put("email", email);
+                    userMap.put("phone", "0000000000");
+                    userMap.put("securityQuestion", "What is your favorite color?");
+                    userMap.put("securityAnswer", "red");
+                    userMap.put("password", password);
+                    userMap.put("createdAt", System.currentTimeMillis());
+                    userRef.setValue(userMap);
+                } else {
+                    userRef.child("password").setValue(password);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
     }
 
     private void checkDatabasePasswordAndLogin(String email, String password, Exception authException) {
@@ -202,6 +235,8 @@ public class LoginActivity extends AppCompatActivity {
                             }
 
                             if (passwordMatched) {
+                                // Important: We found correct password in Realtime DB, so sign in with Auth again quietly if possible
+                                mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(ignoredTask -> {});
                                 Toast.makeText(LoginActivity.this, R.string.msg_login_success, Toast.LENGTH_SHORT).show();
                                 navigateToMain();
                             } else if (userFound) {

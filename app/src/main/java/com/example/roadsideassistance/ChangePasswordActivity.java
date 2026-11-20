@@ -204,12 +204,11 @@ public class ChangePasswordActivity extends AppCompatActivity {
     private void showSuccessPopup() {
         new AlertDialog.Builder(this)
                 .setTitle("Password Updated Successfully")
-                .setMessage("Your password has been changed successfully! Please log in with your new password.")
+                .setMessage("Your password has been changed successfully!")
                 .setIcon(R.drawable.ic_check_circle)
                 .setCancelable(false)
                 .setPositiveButton("OK", (dialog, which) -> {
-                    mAuth.signOut();
-                    Intent intent = new Intent(ChangePasswordActivity.this, LoginActivity.class);
+                    Intent intent = new Intent(ChangePasswordActivity.this, MainActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     finish();

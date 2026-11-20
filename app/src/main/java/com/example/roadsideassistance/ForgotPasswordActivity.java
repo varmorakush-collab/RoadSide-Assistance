@@ -1,8 +1,6 @@
 package com.example.roadsideassistance;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -262,28 +260,11 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     private void resetPasswordViaSecurityQuestion(String email, String question, String answer, String newPassword) {
         showLoading(true);
 
-        final boolean[] isHandled = {false};
-        Handler handler = new Handler(Looper.getMainLooper());
-
-        Runnable timeoutRunnable = () -> {
-            if (!isHandled[0]) {
-                isHandled[0] = true;
-                showLoading(false);
-                showSuccessPopup("Password reset successfully! You can now log in with your new password.");
-            }
-        };
-        handler.postDelayed(timeoutRunnable, 3500);
-
         try {
             mDatabase.child("users")
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (isHandled[0]) return;
-                            isHandled[0] = true;
-                            handler.removeCallbacks(timeoutRunnable);
-                            showLoading(false);
-
                             boolean userFound = false;
                             boolean answerMatched = false;
                             DataSnapshot targetUserSnap = null;
@@ -308,13 +289,35 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
                             if (answerMatched && targetUserSnap != null) {
                                 String oldPassword = targetUserSnap.child("password").getValue(String.class);
-                                targetUserSnap.getRef().child("password").setValue(newPassword);
-                                performPasswordUpdate(email, oldPassword, newPassword);
+                                targetUserSnap.getRef().child("password").setValue(newPassword)
+                                        .addOnCompleteListener(task -> {
+                                            if (!TextUtils.isEmpty(oldPassword)) {
+                                                mAuth.signInWithEmailAndPassword(email, oldPassword)
+                                                        .addOnCompleteListener(signInTask -> {
+                                                            if (signInTask.isSuccessful() && mAuth.getCurrentUser() != null) {
+                                                                mAuth.getCurrentUser().updatePassword(newPassword)
+                                                                        .addOnCompleteListener(updateTask -> {
+                                                                            mAuth.signOut();
+                                                                            showLoading(false);
+                                                                            showSuccessPopup("Password reset successfully! You can now log in with your new password.");
+                                                                        });
+                                                            } else {
+                                                                showLoading(false);
+                                                                showSuccessPopup("Password reset successfully! You can now log in with your new password.");
+                                                            }
+                                                        });
+                                            } else {
+                                                showLoading(false);
+                                                showSuccessPopup("Password reset successfully! You can now log in with your new password.");
+                                            }
+                                        });
                             } else if (userFound) {
+                                showLoading(false);
                                 tilSecurityAnswer.setError(getString(R.string.error_wrong_answer));
                                 etSecurityAnswer.requestFocus();
                                 showErrorPopup("Reset Failed", "The security question or answer you entered is incorrect. Please check your details and try again.");
                             } else {
+                                showLoading(false);
                                 tilEmail.setError(getString(R.string.error_user_not_found));
                                 etEmail.requestFocus();
                                 showErrorPopup("Email Not Registered", "No registered account found with email address: " + email + ". Please check your email or sign up first.");
@@ -323,20 +326,13 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError error) {
-                            if (isHandled[0]) return;
-                            isHandled[0] = true;
-                            handler.removeCallbacks(timeoutRunnable);
                             showLoading(false);
-                            showSuccessPopup("Password reset successfully! You can now log in with your new password.");
+                            showErrorPopup("Reset Failed", "Database error: " + error.getMessage());
                         }
                     });
         } catch (Exception e) {
-            if (!isHandled[0]) {
-                isHandled[0] = true;
-                handler.removeCallbacks(timeoutRunnable);
-                showLoading(false);
-                showSuccessPopup("Password reset successfully! You can now log in with your new password.");
-            }
+            showLoading(false);
+            showErrorPopup("Reset Failed", "An error occurred: " + e.getMessage());
         }
     }
 
@@ -345,39 +341,29 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         mAuth.signInWithEmailAndPassword(email, oldPassword)
                 .addOnCompleteListener(task -> {
-                    showLoading(false);
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
-                            user.updatePassword(newPassword);
-                            mDatabase.child("users").child(user.getUid()).child("password").setValue(newPassword);
+                            user.updatePassword(newPassword)
+                                    .addOnCompleteListener(updateTask -> {
+                                        mDatabase.child("users").child(user.getUid()).child("password").setValue(newPassword)
+                                                .addOnCompleteListener(dbTask -> {
+                                                    mAuth.signOut();
+                                                    showLoading(false);
+                                                    showSuccessPopup("Password reset successfully! You can now log in with your new password.");
+                                                });
+                                    });
+                        } else {
+                            showLoading(false);
+                            showSuccessPopup("Password reset successfully! You can now log in with your new password.");
                         }
-                        showSuccessPopup("Password reset successfully! You can now log in with your new password.");
                     } else {
+                        showLoading(false);
                         tilOldPassword.setError(getString(R.string.error_wrong_old_password));
                         etOldPassword.requestFocus();
                         showErrorPopup("Reset Failed", "The old password you entered is incorrect. Please check your credentials and try again.");
                     }
                 });
-    }
-
-    private void performPasswordUpdate(String email, String oldPassword, String newPassword) {
-        if (!TextUtils.isEmpty(oldPassword)) {
-            mAuth.signInWithEmailAndPassword(email, oldPassword)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful() && mAuth.getCurrentUser() != null) {
-                            mAuth.getCurrentUser().updatePassword(newPassword)
-                                    .addOnCompleteListener(t -> mAuth.signOut());
-                        }
-                    });
-        }
-
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null && currentUser.getEmail() != null && currentUser.getEmail().equalsIgnoreCase(email)) {
-            currentUser.updatePassword(newPassword);
-        }
-
-        showSuccessPopup("Password reset successfully! You can now log in with your new password.");
     }
 
     private void showSuccessPopup(String message) {

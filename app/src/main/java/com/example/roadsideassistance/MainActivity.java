@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         TextView tvUserInfo = findViewById(R.id.tvUserInfo);
+        MaterialButton btnRequestBattery = findViewById(R.id.btnRequestBattery);
         MaterialButton btnViewProfile = findViewById(R.id.btnViewProfile);
         MaterialButton btnChangePassword = findViewById(R.id.btnChangePassword);
         MaterialButton btnLogout = findViewById(R.id.btnLogout);
@@ -40,6 +41,11 @@ public class MainActivity extends AppCompatActivity {
         } else {
             tvUserInfo.setText("Welcome to Roadside Assistance!");
         }
+
+        btnRequestBattery.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, RequestBatteryActivity.class);
+            startActivity(intent);
+        });
 
         btnViewProfile.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ProfileActivity.class);

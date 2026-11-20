@@ -85,17 +85,7 @@ public class ProfileActivity extends AppCompatActivity {
         String userEmail = user.getEmail();
         etEmail.setText(userEmail);
 
-        // Pre-fill immediately from cached values so fields are never blank
-        String cachedName = UserManager.getFullName(this, userEmail);
-        String cachedPhone = UserManager.getPhone(this, userEmail);
-        String cachedQuestion = UserManager.getSecurityQuestion(this, userEmail);
-        String cachedAnswer = UserManager.getSecurityAnswer(this, userEmail);
-
-        if (!TextUtils.isEmpty(cachedName)) etFullName.setText(cachedName);
-        if (!TextUtils.isEmpty(cachedPhone)) etPhone.setText(cachedPhone);
-        if (!TextUtils.isEmpty(cachedQuestion)) actvSecurityQuestion.setText(cachedQuestion, false);
-        if (!TextUtils.isEmpty(cachedAnswer)) etSecurityAnswer.setText(cachedAnswer);
-        if (!TextUtils.isEmpty(user.getDisplayName()) && TextUtils.isEmpty(cachedName)) {
+        if (!TextUtils.isEmpty(user.getDisplayName())) {
             etFullName.setText(user.getDisplayName());
         }
 
@@ -168,7 +158,7 @@ public class ProfileActivity extends AppCompatActivity {
         handler.postDelayed(timeoutRunnable, 2500);
 
         try {
-            mDatabase.child("users")
+            mDatabase.child("users").child(userId)
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -178,30 +168,15 @@ public class ProfileActivity extends AppCompatActivity {
                             showLoading(false);
 
                             if (snapshot.exists()) {
-                                DataSnapshot userSnap = snapshot.child(userId);
-                                if (!userSnap.exists()) {
-                                    for (DataSnapshot child : snapshot.getChildren()) {
-                                        String dbEmail = child.child("email").getValue(String.class);
-                                        if (dbEmail != null && dbEmail.trim().equalsIgnoreCase(userEmail.trim())) {
-                                            userSnap = child;
-                                            break;
-                                        }
-                                    }
-                                }
+                                String fullName = snapshot.child("fullName").getValue(String.class);
+                                String phone = snapshot.child("phone").getValue(String.class);
+                                String securityQuestion = snapshot.child("securityQuestion").getValue(String.class);
+                                String securityAnswer = snapshot.child("securityAnswer").getValue(String.class);
 
-                                if (userSnap.exists()) {
-                                    String fullName = userSnap.child("fullName").getValue(String.class);
-                                    String phone = userSnap.child("phone").getValue(String.class);
-                                    String securityQuestion = userSnap.child("securityQuestion").getValue(String.class);
-                                    String securityAnswer = userSnap.child("securityAnswer").getValue(String.class);
-
-                                    if (!TextUtils.isEmpty(fullName)) etFullName.setText(fullName);
-                                    if (!TextUtils.isEmpty(phone)) etPhone.setText(phone);
-                                    if (!TextUtils.isEmpty(securityQuestion)) actvSecurityQuestion.setText(securityQuestion, false);
-                                    if (!TextUtils.isEmpty(securityAnswer)) etSecurityAnswer.setText(securityAnswer);
-
-                                    UserManager.updateUserProfile(ProfileActivity.this, userEmail, fullName, phone, securityQuestion, securityAnswer);
-                                }
+                                if (!TextUtils.isEmpty(fullName)) etFullName.setText(fullName);
+                                if (!TextUtils.isEmpty(phone)) etPhone.setText(phone);
+                                if (!TextUtils.isEmpty(securityQuestion)) actvSecurityQuestion.setText(securityQuestion, false);
+                                if (!TextUtils.isEmpty(securityAnswer)) etSecurityAnswer.setText(securityAnswer);
                             }
                         }
 
@@ -287,8 +262,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         showLoading(true);
         String email = user.getEmail();
-
-        UserManager.updateUserProfile(this, email, fullName, phone, securityQuestion, securityAnswer);
 
         try {
             user.updateProfile(new UserProfileChangeRequest.Builder()

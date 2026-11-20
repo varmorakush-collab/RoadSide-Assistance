@@ -2,8 +2,6 @@ package com.example.roadsideassistance;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -265,8 +263,6 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     private void saveUserToDatabase(String userId, String fullName, String email, String phone, String securityQuestion, String securityAnswer, String password) {
-        UserManager.saveUser(this, fullName, email, phone, password, securityQuestion, securityAnswer);
-
         Map<String, Object> userMap = new HashMap<>();
         userMap.put("userId", userId);
         userMap.put("fullName", fullName);
@@ -277,25 +273,21 @@ public class SignupActivity extends AppCompatActivity {
         userMap.put("password", password);
         userMap.put("createdAt", System.currentTimeMillis());
 
-        final boolean[] isNavigated = {false};
-
-        Runnable navigateAction = () -> {
-            if (!isNavigated[0]) {
-                isNavigated[0] = true;
-                showLoading(false);
-                showSignupSuccessPopup();
-            }
-        };
-
-        new Handler(Looper.getMainLooper()).postDelayed(navigateAction, 3000);
-
-        try {
-            mDatabase.child("users").child(userId).setValue(userMap)
-                    .addOnCompleteListener(task -> navigateAction.run())
-                    .addOnFailureListener(e -> navigateAction.run());
-        } catch (Exception e) {
-            navigateAction.run();
-        }
+        mDatabase.child("users").child(userId).setValue(userMap)
+                .addOnCompleteListener(task -> {
+                    showLoading(false);
+                    if (task.isSuccessful()) {
+                        showSignupSuccessPopup();
+                    } else {
+                        Exception e = task.getException();
+                        String errorMsg = e != null ? e.getMessage() : "Failed to save user data.";
+                        showErrorPopup("Database Error", "Account created in Auth, but failed to save profile details: " + errorMsg);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    showLoading(false);
+                    showErrorPopup("Database Error", "Failed to save user data: " + e.getMessage());
+                });
     }
 
     private void showSignupSuccessPopup() {

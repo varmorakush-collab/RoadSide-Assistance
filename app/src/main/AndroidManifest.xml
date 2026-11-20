@@ -58,6 +58,12 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Request Battery Help Activity (Tasks 1, 2, 3) -->
+        <activity
+            android:name=".RequestBatteryActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
     </application>
 
 </manifest>

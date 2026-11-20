@@ -8,6 +8,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -20,6 +21,13 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RequestBatteryActivity extends AppCompatActivity {
 
@@ -32,7 +40,11 @@ public class RequestBatteryActivity extends AppCompatActivity {
     private TextInputEditText etLocation;
 
     private MaterialButton btnSubmitRequest;
+    private ProgressBar progressBar;
     private TextView tvBackToMain;
+
+    private FirebaseAuth mAuth;
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +57,9 @@ public class RequestBatteryActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         initViews();
         setupVehicleTypeDropdown();
@@ -64,6 +79,7 @@ public class RequestBatteryActivity extends AppCompatActivity {
         etLocation = findViewById(R.id.etLocation);
 
         btnSubmitRequest = findViewById(R.id.btnSubmitRequest);
+        progressBar = findViewById(R.id.progressBar);
         tvBackToMain = findViewById(R.id.tvBackToMain);
     }
 
@@ -123,7 +139,7 @@ public class RequestBatteryActivity extends AppCompatActivity {
         }
 
         if (TextUtils.isEmpty(location)) {
-            tilLocation.setError("Please enter your current location");
+            tilLocation.setError("Current location is required");
             if (focusView == null) focusView = etLocation;
             isValid = false;
         } else if (location.length() < 3) {
@@ -139,14 +155,57 @@ public class RequestBatteryActivity extends AppCompatActivity {
             return;
         }
 
-        // Task 1 only: Show success message that battery request submitted
-        showSuccessPopup();
+        storeRequestInFirebase(vehicleType, issue, location);
+    }
+
+    private void storeRequestInFirebase(String vehicleType, String issue, String location) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            showErrorPopup("Authentication Required", "Please log in again to submit a request.");
+            return;
+        }
+
+        showLoading(true);
+
+        String userId = currentUser.getUid();
+        String userEmail = currentUser.getEmail() != null ? currentUser.getEmail() : "Unknown";
+        String requestId = mDatabase.child("battery_requests").push().getKey();
+
+        if (requestId == null) {
+            requestId = "req_" + System.currentTimeMillis();
+        }
+
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("requestId", requestId);
+        requestMap.put("userId", userId);
+        requestMap.put("userEmail", userEmail);
+        requestMap.put("vehicleType", vehicleType);
+        requestMap.put("issue", issue);
+        requestMap.put("location", location);
+        requestMap.put("status", "pending");
+        requestMap.put("createdAt", System.currentTimeMillis());
+
+        mDatabase.child("battery_requests").child(requestId).setValue(requestMap)
+                .addOnCompleteListener(task -> {
+                    showLoading(false);
+                    if (task.isSuccessful()) {
+                        showSuccessPopup();
+                    } else {
+                        Exception e = task.getException();
+                        String msg = e != null ? e.getMessage() : "Failed to store request.";
+                        showErrorPopup("Storage Failed", msg);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    showLoading(false);
+                    showErrorPopup("Storage Failed", "Error: " + e.getMessage());
+                });
     }
 
     private void showSuccessPopup() {
         new AlertDialog.Builder(this)
-                .setTitle("Battery Request Submitted")
-                .setMessage("Battery request submitted successfully!")
+                .setTitle("Request Stored")
+                .setMessage("Battery request stored in Firebase successfully with status: PENDING.")
                 .setIcon(R.drawable.ic_check_circle)
                 .setCancelable(false)
                 .setPositiveButton("OK", (dialog, which) -> {
@@ -156,5 +215,25 @@ public class RequestBatteryActivity extends AppCompatActivity {
                     finish();
                 })
                 .show();
+    }
+
+    private void showErrorPopup(String title, String message) {
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    private void showLoading(boolean isLoading) {
+        if (isLoading) {
+            progressBar.setVisibility(View.VISIBLE);
+            btnSubmitRequest.setEnabled(false);
+            btnSubmitRequest.setAlpha(0.6f);
+        } else {
+            progressBar.setVisibility(View.GONE);
+            btnSubmitRequest.setEnabled(true);
+            btnSubmitRequest.setAlpha(1.0f);
+        }
     }
 }

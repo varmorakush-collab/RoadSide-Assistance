@@ -32,17 +32,16 @@
 
                 <ImageView
                     android:id="@+id/imgLogo"
-                    android:layout_width="110dp"
-                    android:layout_height="110dp"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
                     android:adjustViewBounds="true"
                     android:contentDescription="@string/app_name"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/logo" />
+                    android:src="@drawable/logo_new" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
                     android:text="@string/title_signup"
                     android:textColor="@color/text_white"
                     android:textSize="26sp"

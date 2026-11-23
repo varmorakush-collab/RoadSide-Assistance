@@ -175,7 +175,7 @@ public class RequestBatteryActivity extends AppCompatActivity {
             requestId = "req_" + System.currentTimeMillis();
         }
 
-        // Dummy / Predefined technician list assignment (Task 3)
+        // Dummy / Predefined technician list assignment (Task 3) stored silently in DB
         String[] dummyTechnicians = {
                 "Alex Johnson (Mechanic - 4.8★ - Ph: +91 9876543210)",
                 "Michael Smith (Roadside Tech - 4.9★ - Ph: +91 9123456780)",
@@ -200,7 +200,7 @@ public class RequestBatteryActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     showLoading(false);
                     if (task.isSuccessful()) {
-                        showSuccessPopup(assignedTechnician);
+                        showSuccessPopup();
                     } else {
                         Exception e = task.getException();
                         String msg = e != null ? e.getMessage() : "Failed to store request.";
@@ -213,10 +213,10 @@ public class RequestBatteryActivity extends AppCompatActivity {
                 });
     }
 
-    private void showSuccessPopup(String assignedTechnician) {
+    private void showSuccessPopup() {
         new AlertDialog.Builder(this)
                 .setTitle("Request Submitted")
-                .setMessage("Battery request stored in Firebase with status: PENDING.\n\nAssigned Technician:\n" + assignedTechnician)
+                .setMessage("Battery request stored in Firebase successfully with status: PENDING.")
                 .setIcon(R.drawable.ic_check_circle)
                 .setCancelable(false)
                 .setPositiveButton("OK", (dialog, which) -> {

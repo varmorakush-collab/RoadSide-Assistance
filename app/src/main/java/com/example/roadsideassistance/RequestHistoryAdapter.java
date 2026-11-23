@@ -1,0 +1,103 @@
+package com.example.roadsideassistance;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.button.MaterialButton;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAdapter.ViewHolder> {
+
+    private final List<BatteryRequest> requestList;
+    private final OnRequestActionListener listener;
+
+    public interface OnRequestActionListener {
+        void onEdit(BatteryRequest request, int position);
+        void onCancel(BatteryRequest request, int position);
+    }
+
+    public RequestHistoryAdapter(List<BatteryRequest> requestList, OnRequestActionListener listener) {
+        this.requestList = requestList;
+        this.listener = listener;
+    }
+
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_request_history, parent, false);
+        return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        BatteryRequest request = requestList.get(position);
+        holder.tvVehicleType.setText("Vehicle: " + (request.getVehicleType() != null ? request.getVehicleType() : "N/A"));
+        holder.tvIssue.setText("Issue: " + (request.getIssue() != null ? request.getIssue() : "N/A"));
+        holder.tvLocation.setText("Location: " + (request.getLocation() != null ? request.getLocation() : "N/A"));
+
+        String tech = request.getAssignedTechnician();
+        holder.tvTechnician.setText("Technician: " + (tech != null && !tech.isEmpty() ? tech : "Unassigned"));
+
+        String status = request.getStatus() != null ? request.getStatus().toUpperCase() : "PENDING";
+        holder.tvStatusBadge.setText(status);
+
+        if ("PENDING".equalsIgnoreCase(request.getStatus())) {
+            holder.layoutActionButtons.setVisibility(View.VISIBLE);
+        } else {
+            holder.layoutActionButtons.setVisibility(View.GONE);
+        }
+
+        if (request.getCreatedAt() > 0) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault());
+            holder.tvDate.setText("Date: " + sdf.format(new Date(request.getCreatedAt())));
+        } else {
+            holder.tvDate.setText("Date: N/A");
+        }
+
+        holder.btnItemEdit.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onEdit(request, holder.getAdapterPosition());
+            }
+        });
+
+        holder.btnItemCancel.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onCancel(request, holder.getAdapterPosition());
+            }
+        });
+    }
+
+    @Override
+    public int getItemCount() {
+        return requestList.size();
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView tvVehicleType, tvStatusBadge, tvIssue, tvLocation, tvTechnician, tvDate;
+        LinearLayout layoutActionButtons;
+        MaterialButton btnItemEdit, btnItemCancel;
+
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvVehicleType = itemView.findViewById(R.id.tvVehicleType);
+            tvStatusBadge = itemView.findViewById(R.id.tvStatusBadge);
+            tvIssue = itemView.findViewById(R.id.tvIssue);
+            tvLocation = itemView.findViewById(R.id.tvLocation);
+            tvTechnician = itemView.findViewById(R.id.tvTechnician);
+            tvDate = itemView.findViewById(R.id.tvDate);
+            layoutActionButtons = itemView.findViewById(R.id.layoutActionButtons);
+            btnItemEdit = itemView.findViewById(R.id.btnItemEdit);
+            btnItemCancel = itemView.findViewById(R.id.btnItemCancel);
+        }
+    }
+}

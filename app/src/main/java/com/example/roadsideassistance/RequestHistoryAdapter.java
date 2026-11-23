@@ -24,6 +24,8 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
     public interface OnRequestActionListener {
         void onEdit(BatteryRequest request, int position);
         void onCancel(BatteryRequest request, int position);
+        void onFeedback(BatteryRequest request, int position);
+        void onMarkCompleted(BatteryRequest request, int position);
     }
 
     public RequestHistoryAdapter(List<BatteryRequest> requestList, OnRequestActionListener listener) {
@@ -57,6 +59,12 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
             holder.layoutActionButtons.setVisibility(View.GONE);
         }
 
+        if ("COMPLETED".equalsIgnoreCase(request.getStatus())) {
+            holder.btnItemFeedback.setVisibility(View.VISIBLE);
+        } else {
+            holder.btnItemFeedback.setVisibility(View.GONE);
+        }
+
         if (request.getCreatedAt() > 0) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault());
             holder.tvDate.setText("Date: " + sdf.format(new Date(request.getCreatedAt())));
@@ -66,14 +74,30 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
 
         holder.btnItemEdit.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onEdit(request, holder.getAdapterPosition());
+                listener.onEdit(request, holder.getBindingAdapterPosition());
             }
         });
 
         holder.btnItemCancel.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onCancel(request, holder.getAdapterPosition());
+                listener.onCancel(request, holder.getBindingAdapterPosition());
             }
+        });
+
+        holder.btnItemFeedback.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onFeedback(request, holder.getBindingAdapterPosition());
+            }
+        });
+
+        // Debug/Testing shortcut: Long press any pending request card to mark as completed
+        holder.itemView.setOnLongClickListener(v -> {
+            if ("PENDING".equalsIgnoreCase(request.getStatus())) {
+                if (listener != null) {
+                    listener.onMarkCompleted(request, holder.getBindingAdapterPosition());
+                }
+            }
+            return true;
         });
     }
 
@@ -85,7 +109,7 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvVehicleType, tvStatusBadge, tvIssue, tvLocation, tvTechnician, tvDate;
         LinearLayout layoutActionButtons;
-        MaterialButton btnItemEdit, btnItemCancel;
+        MaterialButton btnItemEdit, btnItemCancel, btnItemFeedback;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -98,6 +122,7 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
             layoutActionButtons = itemView.findViewById(R.id.layoutActionButtons);
             btnItemEdit = itemView.findViewById(R.id.btnItemEdit);
             btnItemCancel = itemView.findViewById(R.id.btnItemCancel);
+            btnItemFeedback = itemView.findViewById(R.id.btnItemFeedback);
         }
     }
 }

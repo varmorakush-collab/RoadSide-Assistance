@@ -1,5 +1,6 @@
 package com.example.roadsideassistance;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -231,6 +232,40 @@ public class RequestHistoryActivity extends AppCompatActivity implements Request
                             });
                 })
                 .setNegativeButton("No", null)
+                .show();
+    }
+
+    @Override
+    public void onFeedback(BatteryRequest request, int position) {
+        if (request == null || request.getRequestId() == null) return;
+        Intent intent = new Intent(RequestHistoryActivity.this, FeedbackActivity.class);
+        intent.putExtra("requestId", request.getRequestId());
+        startActivity(intent);
+    }
+
+    @Override
+    public void onMarkCompleted(BatteryRequest request, int position) {
+        if (request == null || request.getRequestId() == null) return;
+
+        new AlertDialog.Builder(this)
+                .setTitle("Debug: Mark Completed")
+                .setMessage("Do you want to mark this request as Completed to test the feedback feature?")
+                .setPositiveButton("Mark Completed", (dialog, which) -> {
+                    FirebaseDatabase.getInstance().getReference().child("battery_requests")
+                            .child(request.getRequestId())
+                            .child("status")
+                            .setValue("completed")
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(RequestHistoryActivity.this, "Request marked as completed!", Toast.LENGTH_SHORT).show();
+                                    request.setStatus("completed");
+                                    filterRequests(currentFilterStatus);
+                                } else {
+                                    Toast.makeText(RequestHistoryActivity.this, "Failed to update status", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                })
+                .setNegativeButton("Cancel", null)
                 .show();
     }
 }

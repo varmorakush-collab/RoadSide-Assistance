@@ -8,7 +8,6 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -21,6 +20,8 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+
+import java.util.Locale;
 
 public class RequestBatteryActivity extends AppCompatActivity {
 
@@ -36,8 +37,8 @@ public class RequestBatteryActivity extends AppCompatActivity {
     private TextInputEditText etIssue;
     private TextInputEditText etLocation;
 
+    private TextView tvEstimatedPrice;
     private MaterialButton btnSubmitRequest;
-    private ProgressBar progressBar;
     private TextView tvBackToMain;
 
     @Override
@@ -73,8 +74,8 @@ public class RequestBatteryActivity extends AppCompatActivity {
         etIssue = findViewById(R.id.etIssue);
         etLocation = findViewById(R.id.etLocation);
 
+        tvEstimatedPrice = findViewById(R.id.tvEstimatedPrice);
         btnSubmitRequest = findViewById(R.id.btnSubmitRequest);
-        progressBar = findViewById(R.id.progressBar);
         tvBackToMain = findViewById(R.id.tvBackToMain);
     }
 
@@ -86,10 +87,12 @@ public class RequestBatteryActivity extends AppCompatActivity {
         String[] fuelTypes = getResources().getStringArray(R.array.fuel_types);
         ArrayAdapter<String> fuelAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, fuelTypes);
         actvFuelType.setAdapter(fuelAdapter);
+
+        actvFuelType.setOnItemClickListener((parent, view, position, id) -> calculateEstimatedPrice());
     }
 
     private void setupTextWatchers() {
-        TextWatcher clearErrorWatcher = new TextWatcher() {
+        TextWatcher priceWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
@@ -100,21 +103,52 @@ public class RequestBatteryActivity extends AppCompatActivity {
                 tilQuantity.setError(null);
                 tilIssue.setError(null);
                 tilLocation.setError(null);
+                calculateEstimatedPrice();
             }
 
             @Override
             public void afterTextChanged(Editable s) {}
         };
 
-        actvVehicleType.addTextChangedListener(clearErrorWatcher);
-        actvFuelType.addTextChangedListener(clearErrorWatcher);
-        etQuantity.addTextChangedListener(clearErrorWatcher);
-        etIssue.addTextChangedListener(clearErrorWatcher);
-        etLocation.addTextChangedListener(clearErrorWatcher);
+        actvFuelType.addTextChangedListener(priceWatcher);
+        etQuantity.addTextChangedListener(priceWatcher);
+        actvVehicleType.addTextChangedListener(priceWatcher);
+        etIssue.addTextChangedListener(priceWatcher);
+        etLocation.addTextChangedListener(priceWatcher);
+    }
+
+    private void calculateEstimatedPrice() {
+        String fuelType = actvFuelType.getText() != null ? actvFuelType.getText().toString().trim() : "";
+        String qtyStr = etQuantity.getText() != null ? etQuantity.getText().toString().trim() : "";
+
+        double ratePerUnit = 0.0;
+        if ("Petrol".equalsIgnoreCase(fuelType)) {
+            ratePerUnit = 100.0;
+        } else if ("Diesel".equalsIgnoreCase(fuelType)) {
+            ratePerUnit = 90.0;
+        } else if ("EV Charging".equalsIgnoreCase(fuelType)) {
+            ratePerUnit = 15.0;
+        } else if ("CNG".equalsIgnoreCase(fuelType)) {
+            ratePerUnit = 80.0;
+        }
+
+        double quantity = 0.0;
+        try {
+            if (!TextUtils.isEmpty(qtyStr)) {
+                quantity = Double.parseDouble(qtyStr);
+            }
+        } catch (NumberFormatException e) {
+            quantity = 0.0;
+        }
+
+        double totalPrice = ratePerUnit * quantity;
+        tvEstimatedPrice.setText(String.format(Locale.getDefault(), "₹%.2f", totalPrice));
     }
 
     private void handleSubmitRequest() {
         String vehicleType = actvVehicleType.getText() != null ? actvVehicleType.getText().toString().trim() : "";
+        String fuelType = actvFuelType.getText() != null ? actvFuelType.getText().toString().trim() : "";
+        String quantity = etQuantity.getText() != null ? etQuantity.getText().toString().trim() : "";
         String issue = etIssue.getText() != null ? etIssue.getText().toString().trim() : "";
         String location = etLocation.getText() != null ? etLocation.getText().toString().trim() : "";
 
@@ -130,6 +164,18 @@ public class RequestBatteryActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(vehicleType)) {
             tilVehicleType.setError("Please select a vehicle type");
             focusView = actvVehicleType;
+            isValid = false;
+        }
+
+        if (TextUtils.isEmpty(fuelType)) {
+            tilFuelType.setError("Please select a fuel type");
+            if (focusView == null) focusView = actvFuelType;
+            isValid = false;
+        }
+
+        if (TextUtils.isEmpty(quantity)) {
+            tilQuantity.setError("Please enter quantity");
+            if (focusView == null) focusView = etQuantity;
             isValid = false;
         }
 
@@ -160,7 +206,6 @@ public class RequestBatteryActivity extends AppCompatActivity {
             return;
         }
 
-        // Dummy success popup without Firebase processing delay
         showSuccessPopup();
     }
 

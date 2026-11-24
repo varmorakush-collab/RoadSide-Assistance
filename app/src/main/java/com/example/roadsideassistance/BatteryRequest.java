@@ -5,6 +5,9 @@ public class BatteryRequest {
     private String userId;
     private String userEmail;
     private String vehicleType;
+    private String fuelType;
+    private String quantity;
+    private String estimatedPrice;
     private String issue;
     private String location;
     private String status;
@@ -15,11 +18,14 @@ public class BatteryRequest {
         // Default constructor required for Firebase Realtime Database
     }
 
-    public BatteryRequest(String requestId, String userId, String userEmail, String vehicleType, String issue, String location, String status, String assignedTechnician, long createdAt) {
+    public BatteryRequest(String requestId, String userId, String userEmail, String vehicleType, String fuelType, String quantity, String estimatedPrice, String issue, String location, String status, String assignedTechnician, long createdAt) {
         this.requestId = requestId;
         this.userId = userId;
         this.userEmail = userEmail;
         this.vehicleType = vehicleType;
+        this.fuelType = fuelType;
+        this.quantity = quantity;
+        this.estimatedPrice = estimatedPrice;
         this.issue = issue;
         this.location = location;
         this.status = status;
@@ -57,6 +63,30 @@ public class BatteryRequest {
 
     public void setVehicleType(String vehicleType) {
         this.vehicleType = vehicleType;
+    }
+
+    public String getFuelType() {
+        return fuelType;
+    }
+
+    public void setFuelType(String fuelType) {
+        this.fuelType = fuelType;
+    }
+
+    public String getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(String quantity) {
+        this.quantity = quantity;
+    }
+
+    public String getEstimatedPrice() {
+        return estimatedPrice;
+    }
+
+    public void setEstimatedPrice(String estimatedPrice) {
+        this.estimatedPrice = estimatedPrice;
     }
 
     public String getIssue() {

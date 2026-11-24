@@ -50,10 +50,21 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/tvFuelDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Fuel: Petrol (5 L) • Est: ₹500.00"
+            android:textColor="@color/primary_orange"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <TextView
             android:id="@+id/tvIssue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="6dp"
             android:text="Issue: Dead battery"
             android:textColor="@color/text_primary"
             android:textSize="14sp" />

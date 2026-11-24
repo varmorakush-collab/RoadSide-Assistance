@@ -47,6 +47,16 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
         holder.tvIssue.setText("Issue: " + (request.getIssue() != null ? request.getIssue() : "N/A"));
         holder.tvLocation.setText("Location: " + (request.getLocation() != null ? request.getLocation() : "N/A"));
 
+        String fuel = request.getFuelType();
+        String qty = request.getQuantity();
+        String estPrice = request.getEstimatedPrice();
+        if (fuel != null && !fuel.isEmpty()) {
+            holder.tvFuelDetails.setText("Fuel: " + fuel + " (" + qty + ") • Est: " + (estPrice != null ? estPrice : "₹0.00"));
+            holder.tvFuelDetails.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvFuelDetails.setVisibility(View.GONE);
+        }
+
         String tech = request.getAssignedTechnician();
         holder.tvTechnician.setText("Technician: " + (tech != null && !tech.isEmpty() ? tech : "Unassigned"));
 
@@ -90,7 +100,6 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
             }
         });
 
-        // Debug/Testing shortcut: Long press any pending request card to mark as completed
         holder.itemView.setOnLongClickListener(v -> {
             if ("PENDING".equalsIgnoreCase(request.getStatus())) {
                 if (listener != null) {
@@ -107,13 +116,14 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvVehicleType, tvStatusBadge, tvIssue, tvLocation, tvTechnician, tvDate;
+        TextView tvVehicleType, tvFuelDetails, tvStatusBadge, tvIssue, tvLocation, tvTechnician, tvDate;
         LinearLayout layoutActionButtons;
         MaterialButton btnItemEdit, btnItemCancel, btnItemFeedback;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvVehicleType = itemView.findViewById(R.id.tvVehicleType);
+            tvFuelDetails = itemView.findViewById(R.id.tvFuelDetails);
             tvStatusBadge = itemView.findViewById(R.id.tvStatusBadge);
             tvIssue = itemView.findViewById(R.id.tvIssue);
             tvLocation = itemView.findViewById(R.id.tvLocation);

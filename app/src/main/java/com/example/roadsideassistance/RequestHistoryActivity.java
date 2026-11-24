@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class RequestHistoryActivity extends AppCompatActivity implements RequestHistoryAdapter.OnRequestActionListener {
@@ -161,32 +162,60 @@ public class RequestHistoryActivity extends AppCompatActivity implements Request
 
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_request, null);
         AutoCompleteTextView actvEditVehicle = dialogView.findViewById(R.id.actvEditVehicle);
+        AutoCompleteTextView actvEditFuel = dialogView.findViewById(R.id.actvEditFuel);
+        TextInputEditText etEditQuantity = dialogView.findViewById(R.id.etEditQuantity);
         TextInputEditText etEditIssue = dialogView.findViewById(R.id.etEditIssue);
         TextInputEditText etEditLocation = dialogView.findViewById(R.id.etEditLocation);
 
         String[] vehicleTypes = getResources().getStringArray(R.array.vehicle_types);
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, vehicleTypes);
-        actvEditVehicle.setAdapter(arrayAdapter);
+        ArrayAdapter<String> vehicleAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, vehicleTypes);
+        actvEditVehicle.setAdapter(vehicleAdapter);
+
+        String[] fuelTypes = getResources().getStringArray(R.array.fuel_types);
+        ArrayAdapter<String> fuelAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, fuelTypes);
+        actvEditFuel.setAdapter(fuelAdapter);
 
         if (request.getVehicleType() != null) actvEditVehicle.setText(request.getVehicleType(), false);
+        if (request.getFuelType() != null) actvEditFuel.setText(request.getFuelType(), false);
+        if (request.getQuantity() != null) etEditQuantity.setText(request.getQuantity());
         if (request.getIssue() != null) etEditIssue.setText(request.getIssue());
         if (request.getLocation() != null) etEditLocation.setText(request.getLocation());
 
         new AlertDialog.Builder(this)
-                .setTitle("Edit Battery Request")
+                .setTitle("Edit Request")
                 .setView(dialogView)
                 .setPositiveButton("Update", (dialog, which) -> {
                     String newVehicle = actvEditVehicle.getText() != null ? actvEditVehicle.getText().toString().trim() : "";
+                    String newFuel = actvEditFuel.getText() != null ? actvEditFuel.getText().toString().trim() : "";
+                    String newQuantity = etEditQuantity.getText() != null ? etEditQuantity.getText().toString().trim() : "";
                     String newIssue = etEditIssue.getText() != null ? etEditIssue.getText().toString().trim() : "";
                     String newLocation = etEditLocation.getText() != null ? etEditLocation.getText().toString().trim() : "";
 
-                    if (TextUtils.isEmpty(newVehicle) || TextUtils.isEmpty(newIssue) || TextUtils.isEmpty(newLocation)) {
+                    if (TextUtils.isEmpty(newVehicle) || TextUtils.isEmpty(newFuel) || TextUtils.isEmpty(newQuantity) || TextUtils.isEmpty(newIssue) || TextUtils.isEmpty(newLocation)) {
                         Toast.makeText(RequestHistoryActivity.this, "All fields are required", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
+                    // Recalculate price
+                    double ratePerUnit = 0.0;
+                    if ("Petrol".equalsIgnoreCase(newFuel)) ratePerUnit = 100.0;
+                    else if ("Diesel".equalsIgnoreCase(newFuel)) ratePerUnit = 90.0;
+                    else if ("EV Charging".equalsIgnoreCase(newFuel)) ratePerUnit = 15.0;
+                    else if ("CNG".equalsIgnoreCase(newFuel)) ratePerUnit = 80.0;
+
+                    double qtyNum = 0.0;
+                    try {
+                        qtyNum = Double.parseDouble(newQuantity);
+                    } catch (NumberFormatException e) {
+                        qtyNum = 0.0;
+                    }
+                    String newEstPrice = String.format(Locale.getDefault(), "₹%.2f", ratePerUnit * qtyNum);
+
                     Map<String, Object> updateMap = new HashMap<>();
                     updateMap.put("vehicleType", newVehicle);
+                    updateMap.put("fuelType", newFuel);
+                    updateMap.put("quantity", newQuantity);
+                    updateMap.put("estimatedPrice", newEstPrice);
                     updateMap.put("issue", newIssue);
                     updateMap.put("location", newLocation);
 
@@ -197,6 +226,9 @@ public class RequestHistoryActivity extends AppCompatActivity implements Request
                                 if (task.isSuccessful()) {
                                     Toast.makeText(RequestHistoryActivity.this, "Request updated successfully", Toast.LENGTH_SHORT).show();
                                     request.setVehicleType(newVehicle);
+                                    request.setFuelType(newFuel);
+                                    request.setQuantity(newQuantity);
+                                    request.setEstimatedPrice(newEstPrice);
                                     request.setIssue(newIssue);
                                     request.setLocation(newLocation);
                                     adapter.notifyDataSetChanged();

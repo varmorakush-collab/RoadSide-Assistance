@@ -14,4 +14,11 @@
         <item>Van / Minivan</item>
         <item>Truck / Commercial</item>
     </string-array>
+
+    <string-array name="fuel_types">
+        <item>Petrol</item>
+        <item>Diesel</item>
+        <item>EV Charging</item>
+        <item>CNG</item>
+    </string-array>
 </resources>

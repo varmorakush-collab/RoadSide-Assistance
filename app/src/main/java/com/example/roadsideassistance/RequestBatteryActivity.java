@@ -21,30 +21,24 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class RequestBatteryActivity extends AppCompatActivity {
 
     private TextInputLayout tilVehicleType;
+    private TextInputLayout tilFuelType;
+    private TextInputLayout tilQuantity;
     private TextInputLayout tilIssue;
     private TextInputLayout tilLocation;
 
     private AutoCompleteTextView actvVehicleType;
+    private AutoCompleteTextView actvFuelType;
+    private TextInputEditText etQuantity;
     private TextInputEditText etIssue;
     private TextInputEditText etLocation;
 
     private MaterialButton btnSubmitRequest;
     private ProgressBar progressBar;
     private TextView tvBackToMain;
-
-    private FirebaseAuth mAuth;
-    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,11 +52,8 @@ public class RequestBatteryActivity extends AppCompatActivity {
             return insets;
         });
 
-        mAuth = FirebaseAuth.getInstance();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-
         initViews();
-        setupVehicleTypeDropdown();
+        setupDropdowns();
         setupTextWatchers();
 
         btnSubmitRequest.setOnClickListener(v -> handleSubmitRequest());
@@ -71,10 +62,14 @@ public class RequestBatteryActivity extends AppCompatActivity {
 
     private void initViews() {
         tilVehicleType = findViewById(R.id.tilVehicleType);
+        tilFuelType = findViewById(R.id.tilFuelType);
+        tilQuantity = findViewById(R.id.tilQuantity);
         tilIssue = findViewById(R.id.tilIssue);
         tilLocation = findViewById(R.id.tilLocation);
 
         actvVehicleType = findViewById(R.id.actvVehicleType);
+        actvFuelType = findViewById(R.id.actvFuelType);
+        etQuantity = findViewById(R.id.etQuantity);
         etIssue = findViewById(R.id.etIssue);
         etLocation = findViewById(R.id.etLocation);
 
@@ -83,10 +78,14 @@ public class RequestBatteryActivity extends AppCompatActivity {
         tvBackToMain = findViewById(R.id.tvBackToMain);
     }
 
-    private void setupVehicleTypeDropdown() {
+    private void setupDropdowns() {
         String[] vehicleTypes = getResources().getStringArray(R.array.vehicle_types);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, vehicleTypes);
-        actvVehicleType.setAdapter(adapter);
+        ArrayAdapter<String> vehicleAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, vehicleTypes);
+        actvVehicleType.setAdapter(vehicleAdapter);
+
+        String[] fuelTypes = getResources().getStringArray(R.array.fuel_types);
+        ArrayAdapter<String> fuelAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, fuelTypes);
+        actvFuelType.setAdapter(fuelAdapter);
     }
 
     private void setupTextWatchers() {
@@ -97,6 +96,8 @@ public class RequestBatteryActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 tilVehicleType.setError(null);
+                tilFuelType.setError(null);
+                tilQuantity.setError(null);
                 tilIssue.setError(null);
                 tilLocation.setError(null);
             }
@@ -106,6 +107,8 @@ public class RequestBatteryActivity extends AppCompatActivity {
         };
 
         actvVehicleType.addTextChangedListener(clearErrorWatcher);
+        actvFuelType.addTextChangedListener(clearErrorWatcher);
+        etQuantity.addTextChangedListener(clearErrorWatcher);
         etIssue.addTextChangedListener(clearErrorWatcher);
         etLocation.addTextChangedListener(clearErrorWatcher);
     }
@@ -116,6 +119,8 @@ public class RequestBatteryActivity extends AppCompatActivity {
         String location = etLocation.getText() != null ? etLocation.getText().toString().trim() : "";
 
         tilVehicleType.setError(null);
+        tilFuelType.setError(null);
+        tilQuantity.setError(null);
         tilIssue.setError(null);
         tilLocation.setError(null);
 
@@ -155,68 +160,14 @@ public class RequestBatteryActivity extends AppCompatActivity {
             return;
         }
 
-        storeRequestInFirebase(vehicleType, issue, location);
-    }
-
-    private void storeRequestInFirebase(String vehicleType, String issue, String location) {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            showErrorPopup("Authentication Required", "Please log in again to submit a request.");
-            return;
-        }
-
-        showLoading(true);
-
-        String userId = currentUser.getUid();
-        String userEmail = currentUser.getEmail() != null ? currentUser.getEmail() : "Unknown";
-        String requestId = mDatabase.child("battery_requests").push().getKey();
-
-        if (requestId == null) {
-            requestId = "req_" + System.currentTimeMillis();
-        }
-
-        // Dummy / Predefined technician list assignment (Task 3) stored silently in DB
-        String[] dummyTechnicians = {
-                "Alex Johnson (Mechanic - 4.8★ - Ph: +91 9876543210)",
-                "Michael Smith (Roadside Tech - 4.9★ - Ph: +91 9123456780)",
-                "David Williams (Battery Specialist - 4.7★ - Ph: +91 9988776655)",
-                "Robert Brown (Senior Technician - 5.0★ - Ph: +91 9554433221)"
-        };
-        int randomIndex = (int) (Math.random() * dummyTechnicians.length);
-        String assignedTechnician = dummyTechnicians[randomIndex];
-
-        Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put("requestId", requestId);
-        requestMap.put("userId", userId);
-        requestMap.put("userEmail", userEmail);
-        requestMap.put("vehicleType", vehicleType);
-        requestMap.put("issue", issue);
-        requestMap.put("location", location);
-        requestMap.put("status", "pending");
-        requestMap.put("assignedTechnician", assignedTechnician);
-        requestMap.put("createdAt", System.currentTimeMillis());
-
-        mDatabase.child("battery_requests").child(requestId).setValue(requestMap)
-                .addOnCompleteListener(task -> {
-                    showLoading(false);
-                    if (task.isSuccessful()) {
-                        showSuccessPopup();
-                    } else {
-                        Exception e = task.getException();
-                        String msg = e != null ? e.getMessage() : "Failed to store request.";
-                        showErrorPopup("Storage Failed", msg);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    showLoading(false);
-                    showErrorPopup("Storage Failed", "Error: " + e.getMessage());
-                });
+        // Dummy success popup without Firebase processing delay
+        showSuccessPopup();
     }
 
     private void showSuccessPopup() {
         new AlertDialog.Builder(this)
                 .setTitle("Request Submitted")
-                .setMessage("Battery request stored in Firebase successfully with status: PENDING.")
+                .setMessage("Request submitted successfully.")
                 .setIcon(R.drawable.ic_check_circle)
                 .setCancelable(false)
                 .setPositiveButton("OK", (dialog, which) -> {
@@ -226,25 +177,5 @@ public class RequestBatteryActivity extends AppCompatActivity {
                     finish();
                 })
                 .show();
-    }
-
-    private void showErrorPopup(String title, String message) {
-        new AlertDialog.Builder(this)
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
-                .show();
-    }
-
-    private void showLoading(boolean isLoading) {
-        if (isLoading) {
-            progressBar.setVisibility(View.VISIBLE);
-            btnSubmitRequest.setEnabled(false);
-            btnSubmitRequest.setAlpha(0.6f);
-        } else {
-            progressBar.setVisibility(View.GONE);
-            btnSubmitRequest.setEnabled(true);
-            btnSubmitRequest.setAlpha(1.0f);
-        }
     }
 }

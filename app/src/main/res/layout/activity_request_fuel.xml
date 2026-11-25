@@ -77,6 +77,21 @@
                     android:orientation="vertical"
                     android:padding="24dp">
 
+                    <!-- Request Again / Prefill Last Order Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnRequestAgain"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginBottom="16dp"
+                        android:text="Request Again (Prefill Last Order)"
+                        android:textColor="@color/primary_orange"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="10dp"
+                        app:strokeColor="@color/primary_orange"
+                        android:visibility="visible" />
+
                     <!-- Vehicle Type Dropdown -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilVehicleType"

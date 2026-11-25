@@ -10,8 +10,10 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -23,10 +25,16 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RequestBatteryActivity extends AppCompatActivity {
@@ -40,11 +48,13 @@ public class RequestBatteryActivity extends AppCompatActivity {
     private TextInputEditText etLocation;
 
     private MaterialButton btnSubmitRequest;
+    private MaterialButton btnRequestAgain;
     private ProgressBar progressBar;
     private TextView tvBackToMain;
 
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
+    private BatteryRequest lastRequest = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,8 +74,10 @@ public class RequestBatteryActivity extends AppCompatActivity {
         initViews();
         setupVehicleTypeDropdown();
         setupTextWatchers();
+        checkForLastOrder();
 
         btnSubmitRequest.setOnClickListener(v -> handleSubmitRequest());
+        btnRequestAgain.setOnClickListener(v -> prefillLastOrder());
         tvBackToMain.setOnClickListener(v -> finish());
     }
 
@@ -79,6 +91,7 @@ public class RequestBatteryActivity extends AppCompatActivity {
         etLocation = findViewById(R.id.etLocation);
 
         btnSubmitRequest = findViewById(R.id.btnSubmitRequest);
+        btnRequestAgain = findViewById(R.id.btnRequestAgain);
         progressBar = findViewById(R.id.progressBar);
         tvBackToMain = findViewById(R.id.tvBackToMain);
     }
@@ -108,6 +121,47 @@ public class RequestBatteryActivity extends AppCompatActivity {
         actvVehicleType.addTextChangedListener(clearErrorWatcher);
         etIssue.addTextChangedListener(clearErrorWatcher);
         etLocation.addTextChangedListener(clearErrorWatcher);
+    }
+
+    private void checkForLastOrder() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) return;
+
+        mDatabase.child("battery_requests")
+                .orderByChild("userId")
+                .equalTo(currentUser.getUid())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        List<BatteryRequest> requests = new ArrayList<>();
+                        if (snapshot.exists()) {
+                            for (DataSnapshot snap : snapshot.getChildren()) {
+                                BatteryRequest req = snap.getValue(BatteryRequest.class);
+                                if (req != null) {
+                                    requests.add(req);
+                                }
+                            }
+                        }
+                        if (!requests.isEmpty()) {
+                            Collections.sort(requests, (r1, r2) -> Long.compare(r2.getCreatedAt(), r1.getCreatedAt()));
+                            lastRequest = requests.get(0);
+                            btnRequestAgain.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {}
+                });
+    }
+
+    private void prefillLastOrder() {
+        if (lastRequest == null) return;
+
+        if (lastRequest.getVehicleType() != null) actvVehicleType.setText(lastRequest.getVehicleType(), false);
+        if (lastRequest.getIssue() != null) etIssue.setText(lastRequest.getIssue());
+        if (lastRequest.getLocation() != null) etLocation.setText(lastRequest.getLocation());
+
+        Toast.makeText(this, "Last battery order prefilled successfully!", Toast.LENGTH_SHORT).show();
     }
 
     private void handleSubmitRequest() {

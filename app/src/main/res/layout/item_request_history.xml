@@ -34,17 +34,17 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:contentDescription="Vehicle"
-                    android:src="@drawable/ic_car"
+                    android:src="@drawable/ic_vehicles"
                     app:tint="@color/primary_orange" />
 
                 <TextView
                     android:id="@+id/tvVehicleType"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="12dp"
                     android:text="Vehicle: Car"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp"
@@ -107,8 +107,8 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:contentDescription="Issue"
                 android:src="@drawable/ic_issue"
                 app:tint="@color/icon_tint" />
@@ -133,8 +133,8 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:contentDescription="Location"
                 android:src="@drawable/ic_location"
                 app:tint="@color/icon_tint" />
@@ -159,8 +159,8 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:contentDescription="Technician"
                 android:src="@drawable/ic_mechanic"
                 app:tint="@color/primary_orange" />
@@ -185,8 +185,8 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:contentDescription="Date"
                 android:src="@drawable/ic_date"
                 app:tint="@color/text_muted" />
@@ -241,7 +241,7 @@
 
         </LinearLayout>
 
-        <!-- Action Button for Completed Requests: Give Feedback -->
+        <!-- ActionButton for Completed Requests: Give Feedback -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnItemFeedback"
             android:layout_width="match_parent"

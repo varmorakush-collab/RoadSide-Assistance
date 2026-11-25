@@ -70,7 +70,19 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Request History Activity -->
+        <!-- Battery Request History Activity -->
+        <activity
+            android:name=".BatteryRequestHistoryActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Fuel Request History Activity -->
+        <activity
+            android:name=".FuelRequestHistoryActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Request History Activity (Legacy) -->
         <activity
             android:name=".RequestHistoryActivity"
             android:exported="false"

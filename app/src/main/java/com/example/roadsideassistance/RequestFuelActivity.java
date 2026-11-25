@@ -213,7 +213,7 @@ public class RequestFuelActivity extends AppCompatActivity {
 
         String userId = currentUser.getUid();
         String userEmail = currentUser.getEmail() != null ? currentUser.getEmail() : "Unknown";
-        String requestId = mDatabase.child("battery_requests").push().getKey();
+        String requestId = mDatabase.child("fuel_requests").push().getKey();
 
         if (requestId == null) {
             requestId = "req_" + System.currentTimeMillis();
@@ -232,7 +232,7 @@ public class RequestFuelActivity extends AppCompatActivity {
         requestMap.put("requestId", requestId);
         requestMap.put("userId", userId);
         requestMap.put("userEmail", userEmail);
-        requestMap.put("vehicleType", vehicleType + " (" + fuelType + " - " + quantity + ")");
+        requestMap.put("vehicleType", vehicleType);
         requestMap.put("fuelType", fuelType);
         requestMap.put("quantity", quantity);
         requestMap.put("estimatedPrice", estimatedPrice);
@@ -242,7 +242,7 @@ public class RequestFuelActivity extends AppCompatActivity {
         requestMap.put("assignedTechnician", assignedTechnician);
         requestMap.put("createdAt", System.currentTimeMillis());
 
-        mDatabase.child("battery_requests").child(requestId).setValue(requestMap)
+        mDatabase.child("fuel_requests").child(requestId).setValue(requestMap)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         showSuccessPopup();
@@ -258,7 +258,7 @@ public class RequestFuelActivity extends AppCompatActivity {
     private void showSuccessPopup() {
         new AlertDialog.Builder(this)
                 .setTitle("Fuel Request Submitted")
-                .setMessage("Fuel delivery request stored in Firebase successfully.")
+                .setMessage("Request submitted successfully.")
                 .setIcon(R.drawable.ic_check_circle)
                 .setCancelable(false)
                 .setPositiveButton("OK", (dialog, which) -> {

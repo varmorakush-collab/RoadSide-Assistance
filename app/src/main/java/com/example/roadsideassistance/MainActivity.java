@@ -36,7 +36,11 @@ public class MainActivity extends AppCompatActivity {
         View cardRequestBattery = findViewById(R.id.cardRequestBattery);
         View cardRequestFuel = findViewById(R.id.cardRequestFuel);
 
-        MaterialButton btnViewHistory = findViewById(R.id.btnViewHistory);
+        MaterialButton btnBatteryHistory = findViewById(R.id.btnBatteryHistory);
+        MaterialButton btnFuelHistory = findViewById(R.id.btnFuelHistory);
+        View cardBatteryHistory = findViewById(R.id.cardBatteryHistory);
+        View cardFuelHistory = findViewById(R.id.cardFuelHistory);
+
         MaterialButton btnViewProfile = findViewById(R.id.btnViewProfile);
         MaterialButton btnChangePassword = findViewById(R.id.btnChangePassword);
         MaterialButton btnLogout = findViewById(R.id.btnLogout);
@@ -62,10 +66,19 @@ public class MainActivity extends AppCompatActivity {
         btnRequestFuel.setOnClickListener(fuelListener);
         if (cardRequestFuel != null) cardRequestFuel.setOnClickListener(fuelListener);
 
-        btnViewHistory.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, RequestHistoryActivity.class);
+        View.OnClickListener batteryHistoryListener = v -> {
+            Intent intent = new Intent(MainActivity.this, BatteryRequestHistoryActivity.class);
             startActivity(intent);
-        });
+        };
+        btnBatteryHistory.setOnClickListener(batteryHistoryListener);
+        if (cardBatteryHistory != null) cardBatteryHistory.setOnClickListener(batteryHistoryListener);
+
+        View.OnClickListener fuelHistoryListener = v -> {
+            Intent intent = new Intent(MainActivity.this, FuelRequestHistoryActivity.class);
+            startActivity(intent);
+        };
+        btnFuelHistory.setOnClickListener(fuelHistoryListener);
+        if (cardFuelHistory != null) cardFuelHistory.setOnClickListener(fuelHistoryListener);
 
         btnViewProfile.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ProfileActivity.class);

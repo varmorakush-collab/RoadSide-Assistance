@@ -2,6 +2,7 @@ package com.example.roadsideassistance;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +32,10 @@ public class MainActivity extends AppCompatActivity {
 
         TextView tvUserInfo = findViewById(R.id.tvUserInfo);
         MaterialButton btnRequestBattery = findViewById(R.id.btnRequestBattery);
+        MaterialButton btnRequestFuel = findViewById(R.id.btnRequestFuel);
+        View cardRequestBattery = findViewById(R.id.cardRequestBattery);
+        View cardRequestFuel = findViewById(R.id.cardRequestFuel);
+
         MaterialButton btnViewHistory = findViewById(R.id.btnViewHistory);
         MaterialButton btnViewProfile = findViewById(R.id.btnViewProfile);
         MaterialButton btnChangePassword = findViewById(R.id.btnChangePassword);
@@ -43,10 +48,19 @@ public class MainActivity extends AppCompatActivity {
             tvUserInfo.setText("Welcome to Roadside Assistance!");
         }
 
-        btnRequestBattery.setOnClickListener(v -> {
+        View.OnClickListener batteryListener = v -> {
             Intent intent = new Intent(MainActivity.this, RequestBatteryActivity.class);
             startActivity(intent);
-        });
+        };
+        btnRequestBattery.setOnClickListener(batteryListener);
+        if (cardRequestBattery != null) cardRequestBattery.setOnClickListener(batteryListener);
+
+        View.OnClickListener fuelListener = v -> {
+            Intent intent = new Intent(MainActivity.this, RequestFuelActivity.class);
+            startActivity(intent);
+        };
+        btnRequestFuel.setOnClickListener(fuelListener);
+        if (cardRequestFuel != null) cardRequestFuel.setOnClickListener(fuelListener);
 
         btnViewHistory.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, RequestHistoryActivity.class);

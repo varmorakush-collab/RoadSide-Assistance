@@ -27,24 +27,18 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 public class RequestBatteryActivity extends AppCompatActivity {
 
     private TextInputLayout tilVehicleType;
-    private TextInputLayout tilFuelType;
-    private TextInputLayout tilQuantity;
     private TextInputLayout tilIssue;
     private TextInputLayout tilLocation;
 
     private AutoCompleteTextView actvVehicleType;
-    private AutoCompleteTextView actvFuelType;
-    private TextInputEditText etQuantity;
     private TextInputEditText etIssue;
     private TextInputEditText etLocation;
 
-    private TextView tvEstimatedPrice;
     private MaterialButton btnSubmitRequest;
     private ProgressBar progressBar;
     private TextView tvBackToMain;
@@ -68,7 +62,7 @@ public class RequestBatteryActivity extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         initViews();
-        setupDropdowns();
+        setupVehicleTypeDropdown();
         setupTextWatchers();
 
         btnSubmitRequest.setOnClickListener(v -> handleSubmitRequest());
@@ -77,100 +71,51 @@ public class RequestBatteryActivity extends AppCompatActivity {
 
     private void initViews() {
         tilVehicleType = findViewById(R.id.tilVehicleType);
-        tilFuelType = findViewById(R.id.tilFuelType);
-        tilQuantity = findViewById(R.id.tilQuantity);
         tilIssue = findViewById(R.id.tilIssue);
         tilLocation = findViewById(R.id.tilLocation);
 
         actvVehicleType = findViewById(R.id.actvVehicleType);
-        actvFuelType = findViewById(R.id.actvFuelType);
-        etQuantity = findViewById(R.id.etQuantity);
         etIssue = findViewById(R.id.etIssue);
         etLocation = findViewById(R.id.etLocation);
 
-        tvEstimatedPrice = findViewById(R.id.tvEstimatedPrice);
         btnSubmitRequest = findViewById(R.id.btnSubmitRequest);
         progressBar = findViewById(R.id.progressBar);
         tvBackToMain = findViewById(R.id.tvBackToMain);
     }
 
-    private void setupDropdowns() {
+    private void setupVehicleTypeDropdown() {
         String[] vehicleTypes = getResources().getStringArray(R.array.vehicle_types);
-        ArrayAdapter<String> vehicleAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, vehicleTypes);
-        actvVehicleType.setAdapter(vehicleAdapter);
-
-        String[] fuelTypes = getResources().getStringArray(R.array.fuel_types);
-        ArrayAdapter<String> fuelAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, fuelTypes);
-        actvFuelType.setAdapter(fuelAdapter);
-
-        actvFuelType.setOnItemClickListener((parent, view, position, id) -> calculateEstimatedPrice());
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, vehicleTypes);
+        actvVehicleType.setAdapter(adapter);
     }
 
     private void setupTextWatchers() {
-        TextWatcher priceWatcher = new TextWatcher() {
+        TextWatcher clearErrorWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 tilVehicleType.setError(null);
-                tilFuelType.setError(null);
-                tilQuantity.setError(null);
                 tilIssue.setError(null);
                 tilLocation.setError(null);
-                calculateEstimatedPrice();
             }
 
             @Override
             public void afterTextChanged(Editable s) {}
         };
 
-        actvFuelType.addTextChangedListener(priceWatcher);
-        etQuantity.addTextChangedListener(priceWatcher);
-        actvVehicleType.addTextChangedListener(priceWatcher);
-        etIssue.addTextChangedListener(priceWatcher);
-        etLocation.addTextChangedListener(priceWatcher);
-    }
-
-    private void calculateEstimatedPrice() {
-        String fuelType = actvFuelType.getText() != null ? actvFuelType.getText().toString().trim() : "";
-        String qtyStr = etQuantity.getText() != null ? etQuantity.getText().toString().trim() : "";
-
-        double ratePerUnit = 0.0;
-        if ("Petrol".equalsIgnoreCase(fuelType)) {
-            ratePerUnit = 100.0;
-        } else if ("Diesel".equalsIgnoreCase(fuelType)) {
-            ratePerUnit = 90.0;
-        } else if ("EV Charging".equalsIgnoreCase(fuelType)) {
-            ratePerUnit = 15.0;
-        } else if ("CNG".equalsIgnoreCase(fuelType)) {
-            ratePerUnit = 80.0;
-        }
-
-        double quantity = 0.0;
-        try {
-            if (!TextUtils.isEmpty(qtyStr)) {
-                quantity = Double.parseDouble(qtyStr);
-            }
-        } catch (NumberFormatException e) {
-            quantity = 0.0;
-        }
-
-        double totalPrice = ratePerUnit * quantity;
-        tvEstimatedPrice.setText(String.format(Locale.getDefault(), "₹%.2f", totalPrice));
+        actvVehicleType.addTextChangedListener(clearErrorWatcher);
+        etIssue.addTextChangedListener(clearErrorWatcher);
+        etLocation.addTextChangedListener(clearErrorWatcher);
     }
 
     private void handleSubmitRequest() {
         String vehicleType = actvVehicleType.getText() != null ? actvVehicleType.getText().toString().trim() : "";
-        String fuelType = actvFuelType.getText() != null ? actvFuelType.getText().toString().trim() : "";
-        String quantity = etQuantity.getText() != null ? etQuantity.getText().toString().trim() : "";
-        String estimatedPrice = tvEstimatedPrice.getText() != null ? tvEstimatedPrice.getText().toString().trim() : "₹0.00";
         String issue = etIssue.getText() != null ? etIssue.getText().toString().trim() : "";
         String location = etLocation.getText() != null ? etLocation.getText().toString().trim() : "";
 
         tilVehicleType.setError(null);
-        tilFuelType.setError(null);
-        tilQuantity.setError(null);
         tilIssue.setError(null);
         tilLocation.setError(null);
 
@@ -180,18 +125,6 @@ public class RequestBatteryActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(vehicleType)) {
             tilVehicleType.setError("Please select a vehicle type");
             focusView = actvVehicleType;
-            isValid = false;
-        }
-
-        if (TextUtils.isEmpty(fuelType)) {
-            tilFuelType.setError("Please select a fuel type");
-            if (focusView == null) focusView = actvFuelType;
-            isValid = false;
-        }
-
-        if (TextUtils.isEmpty(quantity)) {
-            tilQuantity.setError("Please enter quantity");
-            if (focusView == null) focusView = etQuantity;
             isValid = false;
         }
 
@@ -222,10 +155,10 @@ public class RequestBatteryActivity extends AppCompatActivity {
             return;
         }
 
-        storeRequestInFirebase(vehicleType, fuelType, quantity, estimatedPrice, issue, location);
+        storeRequestInFirebase(vehicleType, issue, location);
     }
 
-    private void storeRequestInFirebase(String vehicleType, String fuelType, String quantity, String estimatedPrice, String issue, String location) {
+    private void storeRequestInFirebase(String vehicleType, String issue, String location) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             showErrorPopup("Authentication Required", "Please log in again to submit a request.");
@@ -256,9 +189,6 @@ public class RequestBatteryActivity extends AppCompatActivity {
         requestMap.put("userId", userId);
         requestMap.put("userEmail", userEmail);
         requestMap.put("vehicleType", vehicleType);
-        requestMap.put("fuelType", fuelType);
-        requestMap.put("quantity", quantity);
-        requestMap.put("estimatedPrice", estimatedPrice);
         requestMap.put("issue", issue);
         requestMap.put("location", location);
         requestMap.put("status", "pending");
@@ -285,7 +215,7 @@ public class RequestBatteryActivity extends AppCompatActivity {
     private void showSuccessPopup() {
         new AlertDialog.Builder(this)
                 .setTitle("Request Submitted")
-                .setMessage("Request stored in Firebase successfully with timestamp and status.")
+                .setMessage("Battery request stored in Firebase successfully.")
                 .setIcon(R.drawable.ic_check_circle)
                 .setCancelable(false)
                 .setPositiveButton("OK", (dialog, which) -> {

@@ -52,9 +52,9 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
         String estPrice = request.getEstimatedPrice();
         if (fuel != null && !fuel.isEmpty()) {
             holder.tvFuelDetails.setText("Fuel: " + fuel + " (" + qty + ") • Est: " + (estPrice != null ? estPrice : "₹0.00"));
-            holder.tvFuelDetails.setVisibility(View.VISIBLE);
+            holder.layoutFuelBox.setVisibility(View.VISIBLE);
         } else {
-            holder.tvFuelDetails.setVisibility(View.GONE);
+            holder.layoutFuelBox.setVisibility(View.GONE);
         }
 
         String tech = request.getAssignedTechnician();
@@ -117,13 +117,14 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvVehicleType, tvFuelDetails, tvStatusBadge, tvIssue, tvLocation, tvTechnician, tvDate;
-        LinearLayout layoutActionButtons;
+        LinearLayout layoutActionButtons, layoutFuelBox;
         MaterialButton btnItemEdit, btnItemCancel, btnItemFeedback;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvVehicleType = itemView.findViewById(R.id.tvVehicleType);
             tvFuelDetails = itemView.findViewById(R.id.tvFuelDetails);
+            layoutFuelBox = itemView.findViewById(R.id.layoutFuelBox);
             tvStatusBadge = itemView.findViewById(R.id.tvStatusBadge);
             tvIssue = itemView.findViewById(R.id.tvIssue);
             tvLocation = itemView.findViewById(R.id.tvLocation);

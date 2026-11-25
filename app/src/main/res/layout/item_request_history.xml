@@ -6,32 +6,51 @@
     android:layout_marginStart="16dp"
     android:layout_marginTop="8dp"
     android:layout_marginEnd="16dp"
-    android:layout_marginBottom="8dp"
+    android:layout_marginBottom="12dp"
     app:cardBackgroundColor="@color/card_bg"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="4dp"
-    app:strokeWidth="0dp">
+    app:cardCornerRadius="20dp"
+    app:cardElevation="6dp"
+    app:strokeColor="#E2E8F0"
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp">
 
+        <!-- Top Header: Vehicle & Status Badge -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/tvVehicleType"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Vehicle: Car"
-                android:textColor="@color/text_primary"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:contentDescription="Vehicle"
+                    android:src="@drawable/ic_car"
+                    app:tint="@color/primary_orange" />
+
+                <TextView
+                    android:id="@+id/tvVehicleType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Vehicle: Car"
+                    android:textColor="@color/text_primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tvStatusBadge"
@@ -39,100 +58,186 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_header_gradient"
                 android:paddingStart="12dp"
-                android:paddingTop="4dp"
+                android:paddingTop="5dp"
                 android:paddingEnd="12dp"
-                android:paddingBottom="4dp"
+                android:paddingBottom="5dp"
                 android:text="PENDING"
                 android:textColor="@color/text_white"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="#F1F5F9" />
+
+        <!-- Fuel Details Box (Conditional) -->
+        <LinearLayout
+            android:id="@+id/layoutFuelBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/splash_bg_gradient"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvFuelDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Fuel: Petrol (5 L) • Est: ₹500.00"
+                android:textColor="@color/primary_orange"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- Issue Description -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:contentDescription="Issue"
+                android:src="@drawable/ic_issue"
+                app:tint="@color/icon_tint" />
+
+            <TextView
+                android:id="@+id/tvIssue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="Issue: Dead battery"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp" />
+
+        </LinearLayout>
+
+        <!-- Location -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:contentDescription="Location"
+                android:src="@drawable/ic_location"
+                app:tint="@color/icon_tint" />
+
+            <TextView
+                android:id="@+id/tvLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="Location: Main Street"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+        <!-- Technician -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:contentDescription="Technician"
+                android:src="@drawable/ic_mechanic"
+                app:tint="@color/primary_orange" />
+
+            <TextView
+                android:id="@+id/tvTechnician"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="Technician: Alex Johnson (4.8★)"
+                android:textColor="@color/text_primary"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvFuelDetails"
+        <!-- Date -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="Fuel: Petrol (5 L) • Est: ₹500.00"
-            android:textColor="@color/primary_orange"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            android:visibility="gone" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/tvIssue"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="Issue: Dead battery"
-            android:textColor="@color/text_primary"
-            android:textSize="14sp" />
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:contentDescription="Date"
+                android:src="@drawable/ic_date"
+                app:tint="@color/text_muted" />
 
-        <TextView
-            android:id="@+id/tvLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Location: Main Street"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
+            <TextView
+                android:id="@+id/tvDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="Date: 20 Nov 2026, 11:36 AM"
+                android:textColor="@color/text_muted"
+                android:textSize="11sp" />
 
-        <TextView
-            android:id="@+id/tvTechnician"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Technician: Alex Johnson (4.8★)"
-            android:textColor="@color/text_primary"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="Date: 20 Nov 2026"
-            android:textColor="@color/text_muted"
-            android:textSize="11sp" />
+        </LinearLayout>
 
         <!-- Action Buttons for Pending Requests -->
         <LinearLayout
             android:id="@+id/layoutActionButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="16dp"
             android:orientation="horizontal"
             android:visibility="gone">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnItemEdit"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="44dp"
                 android:layout_weight="1"
                 android:backgroundTint="@color/primary_orange"
-                android:text="Edit"
+                android:text="Edit Request"
                 android:textColor="@color/text_white"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:textStyle="bold"
-                app:cornerRadius="8dp" />
+                app:cornerRadius="12dp" />
 
             <Space
-                android:layout_width="10dp"
+                android:layout_width="12dp"
                 android:layout_height="wrap_content" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnItemCancel"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="44dp"
                 android:layout_weight="1"
                 android:backgroundTint="@color/error_red"
-                android:text="Cancel"
+                android:text="Cancel Request"
                 android:textColor="@color/text_white"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:textStyle="bold"
-                app:cornerRadius="8dp" />
+                app:cornerRadius="12dp" />
 
         </LinearLayout>
 
@@ -140,14 +245,14 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnItemFeedback"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="12dp"
+            android:layout_height="44dp"
+            android:layout_marginTop="16dp"
             android:backgroundTint="@color/success_green"
             android:text="Rate Service / Give Feedback"
             android:textColor="@color/text_white"
-            android:textSize="12sp"
+            android:textSize="13sp"
             android:textStyle="bold"
-            app:cornerRadius="8dp"
+            app:cornerRadius="12dp"
             android:visibility="gone" />
 
     </LinearLayout>

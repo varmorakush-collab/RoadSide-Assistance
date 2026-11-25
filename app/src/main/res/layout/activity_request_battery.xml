@@ -43,9 +43,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="Request Battery &amp; Fuel Help"
+                    android:text="Request Battery Help"
                     android:textColor="@color/text_white"
-                    android:textSize="24sp"
+                    android:textSize="26sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -53,7 +53,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:gravity="center"
-                    android:text="Select vehicle, fuel type, quantity, and location"
+                    android:text="Provide vehicle type, issue, and location details"
                     android:textColor="@color/text_muted"
                     android:textSize="13sp" />
 
@@ -96,87 +96,6 @@
                             android:textSize="15sp" />
 
                     </com.google.android.material.textfield.TextInputLayout>
-
-                    <!-- Fuel Type Dropdown (Task 1) -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilFuelType"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:hint="Fuel Type"
-                        app:startIconDrawable="@drawable/ic_help_question"
-                        app:startIconTint="@color/primary_orange">
-
-                        <AutoCompleteTextView
-                            android:id="@+id/actvFuelType"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:textSize="15sp" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <!-- Quantity Field (Task 1) -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilQuantity"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:hint="Quantity (Liters / kWh)"
-                        app:startIconDrawable="@drawable/ic_help_question"
-                        app:startIconTint="@color/primary_orange">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etQuantity"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="numberDecimal"
-                            android:maxLines="1"
-                            android:textSize="15sp" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <!-- Estimated Price Display Card (Task 3: Display estimated price dynamically) -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        app:cardBackgroundColor="@color/orange_light_bg"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="0dp"
-                        app:strokeColor="@color/primary_orange"
-                        app:strokeWidth="1dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:padding="16dp">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Estimated Price:"
-                                android:textColor="@color/text_primary"
-                                android:textSize="15sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tvEstimatedPrice"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="₹0.00"
-                                android:textColor="@color/primary_orange"
-                                android:textSize="18sp"
-                                android:textStyle="bold" />
-
-                        </LinearLayout>
-
-                    </com.google.android.material.card.MaterialCardView>
 
                     <!-- Issue Description Field -->
                     <com.google.android.material.textfield.TextInputLayout
@@ -227,7 +146,7 @@
                         android:layout_height="54dp"
                         android:layout_marginTop="24dp"
                         android:backgroundTint="@color/primary_orange"
-                        android:text="Submit Request"
+                        android:text="Submit Battery Request"
                         android:textColor="@color/text_white"
                         android:textSize="16sp"
                         android:textStyle="bold"

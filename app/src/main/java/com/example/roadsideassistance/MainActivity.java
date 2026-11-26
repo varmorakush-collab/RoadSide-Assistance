@@ -43,8 +43,10 @@ public class MainActivity extends AppCompatActivity {
 
         MaterialButton btnBatteryHistory = findViewById(R.id.btnBatteryHistory);
         MaterialButton btnFuelHistory = findViewById(R.id.btnFuelHistory);
+        MaterialButton btnTowingHistory = findViewById(R.id.btnTowingHistory);
         View cardBatteryHistory = findViewById(R.id.cardBatteryHistory);
         View cardFuelHistory = findViewById(R.id.cardFuelHistory);
+        View cardTowingHistory = findViewById(R.id.cardTowingHistory);
 
         MaterialButton btnViewProfile = findViewById(R.id.btnViewProfile);
         MaterialButton btnChangePassword = findViewById(R.id.btnChangePassword);
@@ -98,6 +100,13 @@ public class MainActivity extends AppCompatActivity {
         };
         btnFuelHistory.setOnClickListener(fuelHistoryListener);
         if (cardFuelHistory != null) cardFuelHistory.setOnClickListener(fuelHistoryListener);
+
+        View.OnClickListener towingHistoryListener = v -> {
+            Intent intent = new Intent(MainActivity.this, TowingRequestHistoryActivity.class);
+            startActivity(intent);
+        };
+        if (btnTowingHistory != null) btnTowingHistory.setOnClickListener(towingHistoryListener);
+        if (cardTowingHistory != null) cardTowingHistory.setOnClickListener(towingHistoryListener);
 
         btnViewProfile.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ProfileActivity.class);

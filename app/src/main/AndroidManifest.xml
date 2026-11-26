@@ -94,6 +94,12 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Towing Request History Activity (Task 3) -->
+        <activity
+            android:name=".TowingRequestHistoryActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Request History Activity (Legacy) -->
         <activity
             android:name=".RequestHistoryActivity"

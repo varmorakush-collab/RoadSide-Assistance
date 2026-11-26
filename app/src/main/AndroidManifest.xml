@@ -76,6 +76,12 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Garage List Activity (Task 2) -->
+        <activity
+            android:name=".GarageListActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Battery Request History Activity -->
         <activity
             android:name=".BatteryRequestHistoryActivity"

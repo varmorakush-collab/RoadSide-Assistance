@@ -38,6 +38,9 @@ public class MainActivity extends AppCompatActivity {
         View cardRequestFuel = findViewById(R.id.cardRequestFuel);
         View cardRequestTowing = findViewById(R.id.cardRequestTowing);
 
+        MaterialButton btnNearbyGarages = findViewById(R.id.btnNearbyGarages);
+        View cardNearbyGarages = findViewById(R.id.cardNearbyGarages);
+
         MaterialButton btnBatteryHistory = findViewById(R.id.btnBatteryHistory);
         MaterialButton btnFuelHistory = findViewById(R.id.btnFuelHistory);
         View cardBatteryHistory = findViewById(R.id.cardBatteryHistory);
@@ -74,6 +77,13 @@ public class MainActivity extends AppCompatActivity {
         };
         btnRequestTowing.setOnClickListener(towingListener);
         if (cardRequestTowing != null) cardRequestTowing.setOnClickListener(towingListener);
+
+        View.OnClickListener garagesListener = v -> {
+            Intent intent = new Intent(MainActivity.this, GarageListActivity.class);
+            startActivity(intent);
+        };
+        if (btnNearbyGarages != null) btnNearbyGarages.setOnClickListener(garagesListener);
+        if (cardNearbyGarages != null) cardNearbyGarages.setOnClickListener(garagesListener);
 
         View.OnClickListener batteryHistoryListener = v -> {
             Intent intent = new Intent(MainActivity.this, BatteryRequestHistoryActivity.class);

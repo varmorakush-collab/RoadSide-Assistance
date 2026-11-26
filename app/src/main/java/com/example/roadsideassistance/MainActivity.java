@@ -33,8 +33,10 @@ public class MainActivity extends AppCompatActivity {
         TextView tvUserInfo = findViewById(R.id.tvUserInfo);
         MaterialButton btnRequestBattery = findViewById(R.id.btnRequestBattery);
         MaterialButton btnRequestFuel = findViewById(R.id.btnRequestFuel);
+        MaterialButton btnRequestTowing = findViewById(R.id.btnRequestTowing);
         View cardRequestBattery = findViewById(R.id.cardRequestBattery);
         View cardRequestFuel = findViewById(R.id.cardRequestFuel);
+        View cardRequestTowing = findViewById(R.id.cardRequestTowing);
 
         MaterialButton btnBatteryHistory = findViewById(R.id.btnBatteryHistory);
         MaterialButton btnFuelHistory = findViewById(R.id.btnFuelHistory);
@@ -65,6 +67,13 @@ public class MainActivity extends AppCompatActivity {
         };
         btnRequestFuel.setOnClickListener(fuelListener);
         if (cardRequestFuel != null) cardRequestFuel.setOnClickListener(fuelListener);
+
+        View.OnClickListener towingListener = v -> {
+            Intent intent = new Intent(MainActivity.this, RequestTowingActivity.class);
+            startActivity(intent);
+        };
+        btnRequestTowing.setOnClickListener(towingListener);
+        if (cardRequestTowing != null) cardRequestTowing.setOnClickListener(towingListener);
 
         View.OnClickListener batteryHistoryListener = v -> {
             Intent intent = new Intent(MainActivity.this, BatteryRequestHistoryActivity.class);

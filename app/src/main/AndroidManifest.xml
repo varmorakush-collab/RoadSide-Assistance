@@ -70,6 +70,12 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Request Towing Help Activity -->
+        <activity
+            android:name=".RequestTowingActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Battery Request History Activity -->
         <activity
             android:name=".BatteryRequestHistoryActivity"

@@ -212,16 +212,16 @@ public class TowingRequestHistoryActivity extends AppCompatActivity implements R
         if (request == null || request.getRequestId() == null) return;
 
         new AlertDialog.Builder(this)
-                .setTitle("Mark Completed")
-                .setMessage("Do you want to mark this towing request as Completed?")
-                .setPositiveButton("Mark Completed", (dialog, which) -> {
+                .setTitle("Mark Request as Resolved")
+                .setMessage("Are you sure you want to mark this towing request as Resolved / Completed?")
+                .setPositiveButton("Yes, Mark Resolved", (dialog, which) -> {
                     mDatabase.child("towing_requests")
                             .child(request.getRequestId())
                             .child("status")
                             .setValue("completed")
                             .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
-                                    Toast.makeText(TowingRequestHistoryActivity.this, "Towing request completed!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(TowingRequestHistoryActivity.this, "Towing request marked as resolved successfully!", Toast.LENGTH_SHORT).show();
                                     request.setStatus("completed");
                                     adapter.notifyDataSetChanged();
                                 } else {

@@ -277,16 +277,16 @@ public class FuelRequestHistoryActivity extends AppCompatActivity implements Req
         if (request == null || request.getRequestId() == null) return;
 
         new AlertDialog.Builder(this)
-                .setTitle("Debug: Mark Completed")
-                .setMessage("Do you want to mark this fuel request as Completed?")
-                .setPositiveButton("Mark Completed", (dialog, which) -> {
+                .setTitle("Mark Request as Resolved")
+                .setMessage("Are you sure you want to mark this fuel request as Resolved / Completed?")
+                .setPositiveButton("Yes, Mark Resolved", (dialog, which) -> {
                     FirebaseDatabase.getInstance().getReference().child("fuel_requests")
                             .child(request.getRequestId())
                             .child("status")
                             .setValue("completed")
                             .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
-                                    Toast.makeText(FuelRequestHistoryActivity.this, "Fuel request marked as completed!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(FuelRequestHistoryActivity.this, "Fuel request marked as resolved successfully!", Toast.LENGTH_SHORT).show();
                                     request.setStatus("completed");
                                     filterRequests(currentFilterStatus);
                                 } else {

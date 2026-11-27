@@ -63,6 +63,14 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
         String status = request.getStatus() != null ? request.getStatus().toUpperCase() : "PENDING";
         holder.tvStatusBadge.setText(status);
 
+        if ("COMPLETED".equalsIgnoreCase(request.getStatus())) {
+            holder.tvStatusBadge.setBackgroundResource(R.color.success_green);
+        } else if ("CANCELLED".equalsIgnoreCase(request.getStatus())) {
+            holder.tvStatusBadge.setBackgroundResource(R.color.error_red);
+        } else {
+            holder.tvStatusBadge.setBackgroundResource(R.drawable.bg_header_gradient);
+        }
+
         if ("PENDING".equalsIgnoreCase(request.getStatus())) {
             holder.layoutActionButtons.setVisibility(View.VISIBLE);
         } else {
@@ -80,6 +88,14 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
             holder.tvDate.setText("Date: " + sdf.format(new Date(request.getCreatedAt())));
         } else {
             holder.tvDate.setText("Date: N/A");
+        }
+
+        if (holder.btnItemMarkResolved != null) {
+            holder.btnItemMarkResolved.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onMarkCompleted(request, holder.getBindingAdapterPosition());
+                }
+            });
         }
 
         holder.btnItemEdit.setOnClickListener(v -> {
@@ -118,7 +134,7 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvVehicleType, tvFuelDetails, tvStatusBadge, tvIssue, tvLocation, tvTechnician, tvDate;
         LinearLayout layoutActionButtons, layoutFuelBox;
-        MaterialButton btnItemEdit, btnItemCancel, btnItemFeedback;
+        MaterialButton btnItemEdit, btnItemCancel, btnItemFeedback, btnItemMarkResolved;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -134,6 +150,7 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
             btnItemEdit = itemView.findViewById(R.id.btnItemEdit);
             btnItemCancel = itemView.findViewById(R.id.btnItemCancel);
             btnItemFeedback = itemView.findViewById(R.id.btnItemFeedback);
+            btnItemMarkResolved = itemView.findViewById(R.id.btnItemMarkResolved);
         }
     }
 }

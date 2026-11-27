@@ -253,16 +253,16 @@ public class BatteryRequestHistoryActivity extends AppCompatActivity implements 
         if (request == null || request.getRequestId() == null) return;
 
         new AlertDialog.Builder(this)
-                .setTitle("Debug: Mark Completed")
-                .setMessage("Do you want to mark this request as Completed?")
-                .setPositiveButton("Mark Completed", (dialog, which) -> {
+                .setTitle("Mark Request as Resolved")
+                .setMessage("Are you sure you want to mark this battery request as Resolved / Completed?")
+                .setPositiveButton("Yes, Mark Resolved", (dialog, which) -> {
                     FirebaseDatabase.getInstance().getReference().child("battery_requests")
                             .child(request.getRequestId())
                             .child("status")
                             .setValue("completed")
                             .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
-                                    Toast.makeText(BatteryRequestHistoryActivity.this, "Request marked as completed!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(BatteryRequestHistoryActivity.this, "Request marked as resolved successfully!", Toast.LENGTH_SHORT).show();
                                     request.setStatus("completed");
                                     filterRequests(currentFilterStatus);
                                 } else {

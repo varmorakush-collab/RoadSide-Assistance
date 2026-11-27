@@ -273,4 +273,26 @@ public class BatteryRequestHistoryActivity extends AppCompatActivity implements 
                 .setNegativeButton("Cancel", null)
                 .show();
     }
+
+    @Override
+    public void onContactService(BatteryRequest request, int position) {
+        if (request == null) return;
+        String techInfo = request.getAssignedTechnician();
+        String phoneNumber = "+919876543210"; // Default 24/7 Assistance & Towing Helpline
+
+        if (techInfo != null) {
+            java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("\\+?\\d{10,12}").matcher(techInfo);
+            if (matcher.find()) {
+                phoneNumber = matcher.group();
+            }
+        }
+
+        try {
+            Intent dialIntent = new Intent(Intent.ACTION_DIAL);
+            dialIntent.setData(android.net.Uri.parse("tel:" + phoneNumber));
+            startActivity(dialIntent);
+        } catch (Exception e) {
+            Toast.makeText(this, "Unable to open phone dialer", Toast.LENGTH_SHORT).show();
+        }
+    }
 }

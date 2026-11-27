@@ -26,6 +26,7 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
         void onCancel(BatteryRequest request, int position);
         void onFeedback(BatteryRequest request, int position);
         void onMarkCompleted(BatteryRequest request, int position);
+        void onContactService(BatteryRequest request, int position);
     }
 
     public RequestHistoryAdapter(List<BatteryRequest> requestList, OnRequestActionListener listener) {
@@ -90,6 +91,20 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
             holder.tvDate.setText("Date: N/A");
         }
 
+        if (holder.btnItemCallService != null) {
+            if ("PENDING".equalsIgnoreCase(request.getStatus())) {
+                holder.btnItemCallService.setVisibility(View.VISIBLE);
+            } else {
+                holder.btnItemCallService.setVisibility(View.GONE);
+            }
+
+            holder.btnItemCallService.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onContactService(request, holder.getBindingAdapterPosition());
+                }
+            });
+        }
+
         if (holder.btnItemMarkResolved != null) {
             holder.btnItemMarkResolved.setOnClickListener(v -> {
                 if (listener != null) {
@@ -134,7 +149,7 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvVehicleType, tvFuelDetails, tvStatusBadge, tvIssue, tvLocation, tvTechnician, tvDate;
         LinearLayout layoutActionButtons, layoutFuelBox;
-        MaterialButton btnItemEdit, btnItemCancel, btnItemFeedback, btnItemMarkResolved;
+        MaterialButton btnItemEdit, btnItemCancel, btnItemFeedback, btnItemMarkResolved, btnItemCallService;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -151,6 +166,7 @@ public class RequestHistoryAdapter extends RecyclerView.Adapter<RequestHistoryAd
             btnItemCancel = itemView.findViewById(R.id.btnItemCancel);
             btnItemFeedback = itemView.findViewById(R.id.btnItemFeedback);
             btnItemMarkResolved = itemView.findViewById(R.id.btnItemMarkResolved);
+            btnItemCallService = itemView.findViewById(R.id.btnItemCallService);
         }
     }
 }

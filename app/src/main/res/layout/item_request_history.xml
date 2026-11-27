@@ -202,6 +202,25 @@
 
         </LinearLayout>
 
+        <!-- Contact Towing Service Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnItemCallService"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginTop="14dp"
+            android:backgroundTint="@color/orange_light_bg"
+            android:text="Contact Assigned Towing Service"
+            android:textColor="@color/primary_orange"
+            android:textSize="12.5sp"
+            android:textStyle="bold"
+            app:cornerRadius="12dp"
+            app:icon="@drawable/ic_phone"
+            app:iconGravity="textStart"
+            app:iconTint="@color/primary_orange"
+            app:strokeColor="@color/primary_orange"
+            app:strokeWidth="1dp" />
+
         <!-- Action Buttons for Pending Requests -->
         <LinearLayout
             android:id="@+id/layoutActionButtons"

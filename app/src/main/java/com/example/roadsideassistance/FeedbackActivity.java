@@ -7,6 +7,7 @@ import android.widget.RatingBar;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -14,9 +15,6 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.FirebaseDatabase;
 
 public class FeedbackActivity extends AppCompatActivity {
 
@@ -49,45 +47,24 @@ public class FeedbackActivity extends AppCompatActivity {
     }
 
     private void submitFeedback() {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            Toast.makeText(this, "Please log in to submit feedback", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         float rating = ratingBar.getRating();
         String comment = etFeedbackComment.getText() != null ? etFeedbackComment.getText().toString().trim() : "";
 
         if (rating <= 0) {
-            Toast.makeText(this, "Please provide a rating", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please select a star rating", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        progressBar.setVisibility(View.VISIBLE);
-        btnSubmitFeedback.setEnabled(false);
-
-        String feedbackId = FirebaseDatabase.getInstance().getReference().child("service_feedback").push().getKey();
-        String userId = currentUser.getUid();
-        long timestamp = System.currentTimeMillis();
-
-        FeedbackModel feedback = new FeedbackModel(feedbackId, requestId, userId, rating, comment, timestamp);
-
-        if (feedbackId == null) {
-            feedbackId = "fb_" + timestamp;
-        }
-
-        FirebaseDatabase.getInstance().getReference().child("service_feedback")
-                .child(feedbackId)
-                .setValue(feedback)
-                .addOnCompleteListener(task -> {
-                    progressBar.setVisibility(View.GONE);
-                    btnSubmitFeedback.setEnabled(true);
-                    if (task.isSuccessful()) {
-                        Toast.makeText(FeedbackActivity.this, "Thank you for your feedback!", Toast.LENGTH_LONG).show();
-                        finish();
-                    } else {
-                        Toast.makeText(FeedbackActivity.this, "Failed to submit feedback. Try again.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        // Show a clean AlertDialog popup without saving to Firebase
+        new AlertDialog.Builder(this)
+                .setTitle("Feedback Submitted Successfully!")
+                .setMessage("Thank you for giving a " + ((int) rating) + "-star rating! Your feedback helps us improve our roadside service.")
+                .setIcon(R.drawable.ic_check_circle)
+                .setCancelable(false)
+                .setPositiveButton("OK", (dialog, which) -> {
+                    dialog.dismiss();
+                    finish();
+                })
+                .show();
     }
 }

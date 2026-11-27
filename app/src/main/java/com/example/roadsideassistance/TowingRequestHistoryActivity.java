@@ -20,6 +20,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -40,9 +41,12 @@ public class TowingRequestHistoryActivity extends AppCompatActivity implements R
     private RecyclerView rvTowingHistory;
     private ProgressBar progressBar;
     private TextView tvEmptyState;
+    private ChipGroup chipGroupFilters;
 
     private RequestHistoryAdapter adapter;
-    private final List<BatteryRequest> requestList = new ArrayList<>();
+    private final List<BatteryRequest> allRequests = new ArrayList<>();
+    private final List<BatteryRequest> filteredRequests = new ArrayList<>();
+    private String currentFilterStatus = "all";
 
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
@@ -65,12 +69,31 @@ public class TowingRequestHistoryActivity extends AppCompatActivity implements R
         rvTowingHistory = findViewById(R.id.rvTowingHistory);
         progressBar = findViewById(R.id.progressBar);
         tvEmptyState = findViewById(R.id.tvEmptyState);
+        chipGroupFilters = findViewById(R.id.chipGroupFilters);
 
         rvTowingHistory.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new RequestHistoryAdapter(requestList, this);
+        adapter = new RequestHistoryAdapter(filteredRequests, this);
         rvTowingHistory.setAdapter(adapter);
 
+        setupFilters();
         fetchTowingRequests();
+    }
+
+    private void setupFilters() {
+        if (chipGroupFilters != null) {
+            chipGroupFilters.setOnCheckedChangeListener((group, checkedId) -> {
+                if (checkedId == R.id.chipAll) {
+                    currentFilterStatus = "all";
+                } else if (checkedId == R.id.chipPending) {
+                    currentFilterStatus = "pending";
+                } else if (checkedId == R.id.chipCompleted) {
+                    currentFilterStatus = "completed";
+                } else if (checkedId == R.id.chipCancelled) {
+                    currentFilterStatus = "cancelled";
+                }
+                filterRequests(currentFilterStatus);
+            });
+        }
     }
 
     private void fetchTowingRequests() {
@@ -90,25 +113,19 @@ public class TowingRequestHistoryActivity extends AppCompatActivity implements R
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         progressBar.setVisibility(View.GONE);
-                        requestList.clear();
+                        allRequests.clear();
 
                         if (snapshot.exists()) {
                             for (DataSnapshot snap : snapshot.getChildren()) {
                                 BatteryRequest req = snap.getValue(BatteryRequest.class);
                                 if (req != null) {
-                                    requestList.add(req);
+                                    allRequests.add(req);
                                 }
                             }
                         }
 
-                        if (requestList.isEmpty()) {
-                            tvEmptyState.setVisibility(View.VISIBLE);
-                        } else {
-                            tvEmptyState.setVisibility(View.GONE);
-                            Collections.sort(requestList, (r1, r2) -> Long.compare(r2.getCreatedAt(), r1.getCreatedAt()));
-                        }
-
-                        adapter.notifyDataSetChanged();
+                        Collections.sort(allRequests, (r1, r2) -> Long.compare(r2.getCreatedAt(), r1.getCreatedAt()));
+                        filterRequests(currentFilterStatus);
                     }
 
                     @Override
@@ -117,6 +134,28 @@ public class TowingRequestHistoryActivity extends AppCompatActivity implements R
                         Toast.makeText(TowingRequestHistoryActivity.this, "Failed to load history: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void filterRequests(String status) {
+        filteredRequests.clear();
+        if ("all".equalsIgnoreCase(status)) {
+            filteredRequests.addAll(allRequests);
+        } else {
+            for (BatteryRequest req : allRequests) {
+                if (req.getStatus() != null && req.getStatus().equalsIgnoreCase(status)) {
+                    filteredRequests.add(req);
+                }
+            }
+        }
+
+        adapter.notifyDataSetChanged();
+
+        if (filteredRequests.isEmpty()) {
+            tvEmptyState.setVisibility(View.VISIBLE);
+            tvEmptyState.setText("No " + ("all".equalsIgnoreCase(status) ? "" : status) + " towing requests found");
+        } else {
+            tvEmptyState.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -163,7 +202,7 @@ public class TowingRequestHistoryActivity extends AppCompatActivity implements R
                                     request.setVehicleType(newVehicle);
                                     request.setIssue(newIssue);
                                     request.setLocation(newLocation);
-                                    adapter.notifyDataSetChanged();
+                                    filterRequests(currentFilterStatus);
                                 } else {
                                     Toast.makeText(TowingRequestHistoryActivity.this, "Failed to update request", Toast.LENGTH_SHORT).show();
                                 }
@@ -189,7 +228,7 @@ public class TowingRequestHistoryActivity extends AppCompatActivity implements R
                                 if (task.isSuccessful()) {
                                     Toast.makeText(TowingRequestHistoryActivity.this, "Towing request cancelled successfully", Toast.LENGTH_SHORT).show();
                                     request.setStatus("cancelled");
-                                    adapter.notifyDataSetChanged();
+                                    filterRequests(currentFilterStatus);
                                 } else {
                                     Toast.makeText(TowingRequestHistoryActivity.this, "Failed to cancel request", Toast.LENGTH_SHORT).show();
                                 }
@@ -223,7 +262,7 @@ public class TowingRequestHistoryActivity extends AppCompatActivity implements R
                                 if (task.isSuccessful()) {
                                     Toast.makeText(TowingRequestHistoryActivity.this, "Towing request marked as resolved successfully!", Toast.LENGTH_SHORT).show();
                                     request.setStatus("completed");
-                                    adapter.notifyDataSetChanged();
+                                    filterRequests(currentFilterStatus);
                                 } else {
                                     Toast.makeText(TowingRequestHistoryActivity.this, "Failed to update status", Toast.LENGTH_SHORT).show();
                                 }
